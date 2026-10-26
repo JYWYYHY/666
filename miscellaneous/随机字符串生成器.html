@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>随机字符串生成器 · 专业版</title>
+  <style>
+    /* ===== 全局重置 & 基础 ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f4fe 0%, #e2e9f5 100%);
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      max-width: 720px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 32px 34px;
+      border-radius: 40px;
+      box-shadow: 0 24px 48px rgba(0, 20, 40, 0.10), 0 8px 20px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.2s;
+    }
+
+    /* ===== 头部 ===== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 600;
+      color: #14213d;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header h1 span {
+      font-size: 14px;
+      font-weight: 400;
+      background: rgba(20, 33, 61, 0.08);
+      padding: 2px 14px;
+      border-radius: 40px;
+      color: #3d4f6e;
+    }
+    .badge-version {
+      background: #dce5f5;
+      color: #1f3a7a;
+      font-size: 12px;
+      padding: 4px 14px;
+      border-radius: 40px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .badge-save {
+      background: #d1f0e0;
+      color: #0f7b4a;
+      font-size: 11px;
+      padding: 3px 12px;
+      border-radius: 40px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    /* ===== 表单元素 ===== */
+    .row {
+      margin-bottom: 18px;
+    }
+    .row label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #1e2b44;
+      font-size: 14px;
+      letter-spacing: 0.2px;
+    }
+    .row .hint {
+      font-size: 12px;
+      color: #68759b;
+      margin-left: 8px;
+      font-weight: 400;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 16px;
+      border: 1px solid #d7e0eb;
+      border-radius: 14px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.7);
+      transition: 0.15s;
+      color: #0f1a2e;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+    }
+    input:focus {
+      outline: none;
+      border-color: #3f6ed8;
+      box-shadow: 0 0 0 4px rgba(63, 110, 216, 0.12);
+      background: #ffffff;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .flex-row .row {
+      flex: 1;
+      min-width: 140px;
+      position: relative;
+    }
+
+    /* ===== 复选框组 ===== */
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 28px;
+      margin-top: 6px;
+      background: rgba(249, 251, 254, 0.6);
+      padding: 12px 18px;
+      border-radius: 18px;
+      border: 1px solid #e9eef5;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #2563eb;
+      cursor: pointer;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .checkbox-item label {
+      margin-bottom: 0;
+      cursor: pointer;
+      font-weight: 450;
+      font-size: 14px;
+      color: #1f2c46;
+    }
+
+    /* ===== 保存状态提示 ===== */
+    .save-indicator {
+      font-size: 12px;
+      color: #68759b;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.7;
+      transition: 0.3s;
+    }
+    .save-indicator .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    .save-indicator.saved .dot {
+      background: #10b981;
+    }
+    .save-indicator.unsaved .dot {
+      background: #f59e0b;
+    }
+
+    /* ===== 下拉历史菜单 ===== */
+    .history-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid #d7e0eb;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      padding: 6px 0;
+    }
+    .history-dropdown.show {
+      display: block;
+    }
+    .history-dropdown .history-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #1e2b44;
+      transition: 0.1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid #f0f3f8;
+    }
+    .history-dropdown .history-item:last-child {
+      border-bottom: none;
+    }
+    .history-dropdown .history-item:hover {
+      background: #eef3fd;
+    }
+    .history-dropdown .history-item .delete-btn {
+      background: none;
+      border: none;
+      color: #b0bdd0;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      transition: 0.15s;
+      border-radius: 6px;
+      line-height: 1;
+    }
+    .history-dropdown .history-item .delete-btn:hover {
+      color: #e74c3c;
+      background: rgba(231, 76, 60, 0.08);
+    }
+    .history-dropdown .history-empty {
+      padding: 16px;
+      text-align: center;
+      color: #a0b3cf;
+      font-size: 13px;
+    }
+    .history-dropdown::-webkit-scrollbar {
+      width: 4px;
+    }
+    .history-dropdown::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .history-dropdown::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* ===== 按钮组 ===== */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .btn-group button {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 40px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1 0 auto;
+      letter-spacing: 0.3px;
+      background: #f0f3f8;
+      color: #1d2b44;
+    }
+    .btn-gen {
+      background: #1f3a7a;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(26, 56, 130, 0.18);
+    }
+    .btn-gen:hover { background: #142d61; transform: scale(1.01); }
+    .btn-copy {
+      background: #0f7b4a;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 110, 70, 0.16);
+    }
+    .btn-copy:hover { background: #0b663d; transform: scale(1.01); }
+    .btn-jump {
+      background: #6b4c9c;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(90, 60, 150, 0.16);
+    }
+    .btn-jump:hover { background: #553d7e; transform: scale(1.01); }
+    .btn-clear {
+      background: #e5eaf2;
+      color: #1e2b44;
+    }
+    .btn-clear:hover { background: #d3dce8; }
+    button:active { transform: scale(0.97); }
+
+    /* ===== 跳转区域 ===== */
+    .jump-section {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid #e9eef5;
+      display: none;
+    }
+    .jump-section.visible {
+      display: block;
+    }
+    .jump-url-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .jump-url-row .url-display {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 14px;
+      border: 1px solid #d7e0eb;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      color: #1f3a7a;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    .jump-url-row .url-display .label {
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+      color: #68759b;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .jump-url-row .btn-jump {
+      flex: 0 0 auto;
+      padding: 10px 28px;
+      min-width: 100px;
+    }
+
+    /* ===== 结果区域 ===== */
+    .result-wrap {
+      margin-top: 24px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 18px;
+      padding: 6px 6px 6px 20px;
+      border: 1px solid #e6edf6;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      transition: 0.15s;
+      backdrop-filter: blur(4px);
+    }
+    .result-wrap:focus-within {
+      border-color: #3f6ed8;
+      box-shadow: 0 0 0 3px rgba(63, 110, 216, 0.08);
+    }
+    #result {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 4px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 16px;
+      word-break: break-all;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #0a1428;
+      letter-spacing: 0.2px;
+      line-height: 1.6;
+      min-height: 52px;
+    }
+    #result:empty::before {
+      content: "点击「生成字符串」";
+      color: #a0b3cf;
+      font-weight: 400;
+      font-family: system-ui, sans-serif;
+    }
+    #result.url {
+      color: #1f3a7a;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+    #result.url:hover {
+      color: #3f6ed8;
+    }
+    .copy-icon-btn {
+      background: #e4ecf7;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 20px;
+      font-weight: 500;
+      color: #1f2a44;
+      cursor: pointer;
+      transition: 0.15s;
+      font-size: 14px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .copy-icon-btn:hover { background: #ccd9ec; border-color: #b0c3df; }
+    .copy-icon-btn.copied { background: #0f7b4a; color: #fff; }
+
+    /* ===== Toast 通知 ===== */
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 92%;
+    }
+    .toast {
+      background: rgba(20, 33, 61, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #f0f4fe;
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-size: 15px;
+      font-weight: 450;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: auto;
+      animation: toastIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      letter-spacing: 0.2px;
+      text-align: center;
+      min-width: 160px;
+    }
+    .toast.success { background: rgba(15, 123, 74, 0.92); }
+    .toast.warn { background: rgba(180, 83, 9, 0.92); }
+    .toast.error { background: rgba(180, 40, 40, 0.92); }
+    .toast.out { animation: toastOut 0.28s ease-in forwards; }
+
+    @keyframes toastIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes toastOut {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.94) translateY(16px); }
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 520px) {
+      .card { padding: 20px 16px; border-radius: 28px; }
+      .header h1 { font-size: 20px; }
+      .btn-group button { flex: 1 1 100%; }
+      .jump-url-row { flex-direction: column; align-items: stretch; }
+      .jump-url-row .btn-jump { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- 头部 -->
+  <div class="header">
+    <h1>
+      🧬 随机串
+      <span>pro</span>
+    </h1>
+    <div>
+      <span class="badge-save">💾 历史记录</span>
+      <span class="badge-version">v2.4</span>
+    </div>
+  </div>
+
+  <!-- 长度 -->
+  <div class="row">
+    <label>
+      📏 随机部分长度
+      <span class="hint">（前后缀额外附加，总长 = 随机 + 前缀 + 后缀）</span>
+    </label>
+    <input id="lenInput" type="number" value="16" min="1" max="512" />
+  </div>
+
+  <!-- 字符类型 -->
+  <div class="row">
+    <label>🔤 字符集（至少选一项）</label>
+    <div class="checkbox-group">
+      <div class="checkbox-item">
+        <input type="checkbox" id="lower" checked />
+        <label for="lower">小写 a‑z</label>
+      </div>
+      <div class="checkbox-item">
+        <input type="checkbox" id="upper" checked />
+        <label for="upper">大写 A‑Z</label>
+      </div>
+      <div class="checkbox-item">
+        <input type="checkbox" id="digit" checked />
+        <label for="digit">数字 0‑9</label>
+      </div>
+      <div class="checkbox-item">
+        <input type="checkbox" id="symbol" />
+        <label for="symbol">符号 !@#$%^&*_+-=</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 前缀 & 后缀 -->
+  <div class="flex-row">
+    <div class="row">
+      <label>⏺ 前缀（固定）</label>
+      <input id="prefixInput" type="text" placeholder="例如: ABC_" autocomplete="off" />
+      <div class="history-dropdown" id="prefixDropdown"></div>
+      <div class="save-indicator" id="prefixStatus">
+        <span class="dot"></span> 自动保存
+      </div>
+    </div>
+    <div class="row">
+      <label>⏹ 后缀（固定）</label>
+      <input id="suffixInput" type="text" placeholder="例如: _end" autocomplete="off" />
+      <div class="history-dropdown" id="suffixDropdown"></div>
+      <div class="save-indicator" id="suffixStatus">
+        <span class="dot"></span> 自动保存
+      </div>
+    </div>
+  </div>
+
+  <!-- 主按钮 -->
+  <div class="btn-group">
+    <button class="btn-gen" id="btnGenerate">✨ 生成</button>
+    <button class="btn-copy" id="btnCopy">📋 复制</button>
+    <button class="btn-clear" id="btnClear">↺ 清空</button>
+  </div>
+
+  <!-- 跳转区域 -->
+  <div class="jump-section" id="jumpSection">
+    <div class="jump-url-row">
+      <div class="url-display" id="urlDisplay">
+        <span class="label">🔗 检测到完整网址（含协议头），点击下方按钮跳转</span>
+        <span id="urlText">—</span>
+      </div>
+      <button class="btn-jump" id="btnJump">🚀 跳转到该网址</button>
+    </div>
+  </div>
+
+  <!-- 结果展示 -->
+  <div class="result-wrap">
+    <div id="result" role="textbox" readonly></div>
+    <button class="copy-icon-btn" id="inlineCopyBtn">📄 复制</button>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div id="toast-container"></div>
+
+<script>
+  (function() {
+    // ========== DOM 引用 ==========
+    const lenInput = document.getElementById('lenInput');
+    const lower = document.getElementById('lower');
+    const upper = document.getElementById('upper');
+    const digit = document.getElementById('digit');
+    const symbol = document.getElementById('symbol');
+    const prefixInput = document.getElementById('prefixInput');
+    const suffixInput = document.getElementById('suffixInput');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnJump = document.getElementById('btnJump');
+    const btnClear = document.getElementById('btnClear');
+    const inlineCopyBtn = document.getElementById('inlineCopyBtn');
+    const resultDom = document.getElementById('result');
+    const jumpSection = document.getElementById('jumpSection');
+    const urlText = document.getElementById('urlText');
+    const prefixStatus = document.getElementById('prefixStatus');
+    const suffixStatus = document.getElementById('suffixStatus');
+    const prefixDropdown = document.getElementById('prefixDropdown');
+    const suffixDropdown = document.getElementById('suffixDropdown');
+
+    // ========== 存储 Key ==========
+    const STORAGE_KEYS = {
+      prefix: 'random_gen_prefix',
+      suffix: 'random_gen_suffix',
+      prefixHistory: 'random_gen_prefix_history',
+      suffixHistory: 'random_gen_suffix_history',
+    };
+
+    // ========== 字符集 ==========
+    const charSets = {
+      lower: 'abcdefghijklmnopqrstuvwxyz',
+      upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      digit: '0123456789',
+      symbol: '!@#$%^&*_+-='
+    };
+
+    // ========== 历史记录管理 ==========
+    function getHistory(key) {
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveHistory(key, history) {
+      try {
+        // 去重，保留最近20条
+        const unique = [...new Set(history)];
+        const trimmed = unique.slice(0, 20);
+        localStorage.setItem(key, JSON.stringify(trimmed));
+      } catch (e) {}
+    }
+
+    function addToHistory(key, value) {
+      if (!value || value.trim() === '') return;
+      const history = getHistory(key);
+      // 移除重复项
+      const filtered = history.filter(item => item !== value);
+      filtered.unshift(value);
+      saveHistory(key, filtered);
+    }
+
+    function removeFromHistory(key, value) {
+      const history = getHistory(key);
+      const filtered = history.filter(item => item !== value);
+      saveHistory(key, filtered);
+    }
+
+    // ========== 渲染下拉菜单 ==========
+    function renderDropdown(dropdownEl, inputEl, historyKey) {
+      const history = getHistory(historyKey);
+      dropdownEl.innerHTML = '';
+      
+      if (history.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'history-empty';
+        empty.textContent = '暂无历史记录';
+        dropdownEl.appendChild(empty);
+        return;
+      }
+
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        
+        const textSpan = document.createElement('span');
+        textSpan.textContent = item;
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '✕';
+        delBtn.title = '删除此条记录';
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeFromHistory(historyKey, item);
+          renderDropdown(dropdownEl, inputEl, historyKey);
+          showToast('🗑️ 已删除历史记录', 'info', 1500);
+        });
+        
+        div.appendChild(textSpan);
+        div.appendChild(delBtn);
+        
+        div.addEventListener('click', () => {
+          inputEl.value = item;
+          // 触发 input 事件，触发自动保存
+          inputEl.dispatchEvent(new Event('input'));
+          dropdownEl.classList.remove('show');
+          // 自动触发生成？
+          // 不自动生成，让用户自己决定
+          showToast('✅ 已填充：' + item, 'success', 1200);
+        });
+        
+        dropdownEl.appendChild(div);
+      });
+    }
+
+    // ========== 切换下拉菜单 ==========
+    function toggleDropdown(dropdownEl, inputEl, historyKey) {
+      const isShowing = dropdownEl.classList.contains('show');
+      // 关闭所有下拉
+      document.querySelectorAll('.history-dropdown').forEach(d => d.classList.remove('show'));
+      if (!isShowing) {
+        renderDropdown(dropdownEl, inputEl, historyKey);
+        dropdownEl.classList.add('show');
+      }
+    }
+
+    // ========== 点击外部关闭下拉 ==========
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.row')) {
+        document.querySelectorAll('.history-dropdown').forEach(d => d.classList.remove('show'));
+      }
+    });
+
+    // ========== 检测是否为有效 URL ==========
+    function isValidUrl(str) {
+      if (!str || str.trim() === '') return false;
+      const trimmed = str.trim();
+      try {
+        const url = new URL(trimmed);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // ========== 更新跳转区域显示 ==========
+    function updateJumpSection(text) {
+      if (!text || text.trim() === '') {
+        jumpSection.classList.remove('visible');
+        resultDom.classList.remove('url');
+        return;
+      }
+      const trimmed = text.trim();
+      if (isValidUrl(trimmed)) {
+        jumpSection.classList.add('visible');
+        urlText.textContent = trimmed;
+        resultDom.classList.add('url');
+        resultDom.title = '点击跳转到该网址';
+      } else {
+        jumpSection.classList.remove('visible');
+        resultDom.classList.remove('url');
+        resultDom.title = '';
+      }
+    }
+
+    // ========== 保存当前前缀/后缀到历史 ==========
+    function saveCurrentToHistory() {
+      const prefix = prefixInput.value.trim();
+      const suffix = suffixInput.value.trim();
+      if (prefix) addToHistory(STORAGE_KEYS.prefixHistory, prefix);
+      if (suffix) addToHistory(STORAGE_KEYS.suffixHistory, suffix);
+    }
+
+    // ========== 保存/加载 当前值 ==========
+    function savePrefixSuffix() {
+      const prefix = prefixInput.value;
+      const suffix = suffixInput.value;
+      try {
+        localStorage.setItem(STORAGE_KEYS.prefix, prefix);
+        localStorage.setItem(STORAGE_KEYS.suffix, suffix);
+        updateSaveIndicator(prefixStatus, true);
+        updateSaveIndicator(suffixStatus, true);
+        // 同时保存到历史
+        saveCurrentToHistory();
+      } catch (e) {}
+    }
+
+    function loadPrefixSuffix() {
+      try {
+        const prefix = localStorage.getItem(STORAGE_KEYS.prefix);
+        const suffix = localStorage.getItem(STORAGE_KEYS.suffix);
+        if (prefix !== null) {
+          prefixInput.value = prefix;
+          updateSaveIndicator(prefixStatus, true);
+        }
+        if (suffix !== null) {
+          suffixInput.value = suffix;
+          updateSaveIndicator(suffixStatus, true);
+        }
+        if (prefix !== null || suffix !== null) {
+          setTimeout(() => {
+            showToast('💾 已恢复上次保存的前缀/后缀', 'info', 2000);
+          }, 400);
+        }
+      } catch (e) {}
+    }
+
+    function updateSaveIndicator(el, saved) {
+      if (saved) {
+        el.className = 'save-indicator saved';
+        el.innerHTML = '<span class="dot"></span> 已保存';
+      } else {
+        el.className = 'save-indicator unsaved';
+        el.innerHTML = '<span class="dot"></span> 未保存';
+      }
+    }
+
+    // ========== 自动保存 ==========
+    let saveTimer = null;
+    function autoSave() {
+      if (saveTimer) clearTimeout(saveTimer);
+      updateSaveIndicator(prefixStatus, false);
+      updateSaveIndicator(suffixStatus, false);
+      saveTimer = setTimeout(() => {
+        savePrefixSuffix();
+        saveTimer = null;
+      }, 600);
+    }
+
+    // ========== Toast 系统 ==========
+    const toastContainer = document.getElementById('toast-container');
+
+    function showToast(message, type = 'info', duration = 2800) {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = message;
+      toastContainer.appendChild(el);
+
+      setTimeout(() => {
+        el.classList.add('out');
+        setTimeout(() => {
+          if (el.parentNode) el.remove();
+        }, 300);
+      }, duration);
+
+      while (toastContainer.children.length > 3) {
+        toastContainer.firstChild.remove();
+      }
+    }
+
+    // ========== 核心：生成随机字符串 ==========
+    function generateFullString() {
+      let pool = '';
+      if (lower.checked) pool += charSets.lower;
+      if (upper.checked) pool += charSets.upper;
+      if (digit.checked) pool += charSets.digit;
+      if (symbol.checked) pool += charSets.symbol;
+
+      if (!pool) {
+        showToast('⚠️ 请至少选择一种字符类型', 'warn');
+        return null;
+      }
+
+      let rawLen = parseInt(lenInput.value, 10);
+      if (isNaN(rawLen) || rawLen < 1) {
+        showToast('⚠️ 长度必须为 ≥ 1 的数字', 'warn');
+        return null;
+      }
+      if (rawLen > 512) {
+        showToast('⚠️ 长度不能超过 512', 'warn');
+        return null;
+      }
+
+      const prefix = prefixInput.value || '';
+      const suffix = suffixInput.value || '';
+
+      let randomCore = '';
+      for (let i = 0; i < rawLen; i++) {
+        const idx = Math.floor(Math.random() * pool.length);
+        randomCore += pool[idx];
+      }
+
+      return prefix + randomCore + suffix;
+    }
+
+    // ========== 生成并显示 ==========
+    function handleGenerate() {
+      const result = generateFullString();
+      if (result !== null) {
+        resultDom.innerText = result;
+        updateJumpSection(result);
+        showToast('✅ 生成成功', 'success');
+      }
+    }
+
+    // ========== 复制 ==========
+    function copyToClipboard(text) {
+      if (!text || text.trim() === '') {
+        showToast('⚠️ 没有内容可复制，请先生成', 'warn');
+        return;
+      }
+
+      const doCopy = () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => { copySuccess(); })
+            .catch(() => { fallbackCopy(text); });
+        } else {
+          fallbackCopy(text);
+        }
+      };
+
+      const fallbackCopy = (t) => {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          copySuccess();
+        } catch (e) {
+          showToast('❌ 复制失败，请手动复制', 'error');
+        }
+        document.body.removeChild(ta);
+      };
+
+      const copySuccess = () => {
+        showToast('✅ 已复制到剪贴板', 'success');
+        [inlineCopyBtn, btnCopy].forEach(b => {
+          b.textContent = '✅ 已复制';
+          b.classList.add('copied');
+          setTimeout(() => {
+            b.textContent = b === inlineCopyBtn ? '📄 复制' : '📋 复制';
+            b.classList.remove('copied');
+          }, 2000);
+        });
+      };
+
+      doCopy();
+    }
+
+    function handleCopy() {
+      copyToClipboard(resultDom.innerText || '');
+    }
+
+    // ========== 跳转 ==========
+    function handleJump() {
+      const text = resultDom.innerText || '';
+      if (!text || text.trim() === '') {
+        showToast('⚠️ 没有内容可跳转，请先生成', 'warn');
+        return;
+      }
+      const trimmed = text.trim();
+      if (!isValidUrl(trimmed)) {
+        showToast('⚠️ 当前字符串不是完整的网址（需包含 http:// 或 https://）', 'warn');
+        return;
+      }
+
+      try {
+        window.open(trimmed, '_blank');
+        showToast('✅ 已在新窗口打开 ' + trimmed, 'success');
+      } catch (e) {
+        showToast('❌ 打开网址失败，请检查URL格式', 'error');
+      }
+    }
+
+    function handleResultClick() {
+      const text = resultDom.innerText || '';
+      if (text && isValidUrl(text.trim())) {
+        handleJump();
+      }
+    }
+
+    // ========== 清空 ==========
+    function handleClear() {
+      resultDom.innerText = '';
+      updateJumpSection('');
+      showToast('↺ 已清空', 'info');
+    }
+
+    // ========== 绑定事件 ==========
+    btnGenerate.addEventListener('click', handleGenerate);
+    btnCopy.addEventListener('click', handleCopy);
+    inlineCopyBtn.addEventListener('click', handleCopy);
+    btnJump.addEventListener('click', handleJump);
+    btnClear.addEventListener('click', handleClear);
+    resultDom.addEventListener('click', handleResultClick);
+
+    // 前缀/后缀 输入时自动保存
+    prefixInput.addEventListener('input', autoSave);
+    suffixInput.addEventListener('input', autoSave);
+
+    // 点击输入框显示历史下拉
+    prefixInput.addEventListener('focus', (e) => {
+      toggleDropdown(prefixDropdown, prefixInput, STORAGE_KEYS.prefixHistory);
+    });
+    suffixInput.addEventListener('focus', (e) => {
+      toggleDropdown(suffixDropdown, suffixInput, STORAGE_KEYS.suffixHistory);
+    });
+
+    // 回车快捷生成
+    [lenInput, prefixInput, suffixInput].forEach(el => {
+      el.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          // 关闭下拉
+          document.querySelectorAll('.history-dropdown').forEach(d => d.classList.remove('show'));
+          handleGenerate();
+        }
+      });
+    });
+
+    // ========== 页面加载 ==========
+    window.addEventListener('load', function() {
+      loadPrefixSuffix();
+
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) {
+        resultDom.innerText = q;
+        updateJumpSection(q);
+        showToast('📥 已从 URL 读取字符串', 'info', 2000);
+      } else {
+        handleGenerate();
+      }
+    });
+
+    // ========== 页面关闭前保存 ==========
+    window.addEventListener('beforeunload', function() {
+      savePrefixSuffix();
+    });
+
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON文件筛选工具 - 可视化版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        accent: '#8b5cf6',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass {
+                @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-lg;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+            }
+            .btn-secondary {
+                @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+            }
+            .btn-outline {
+                @apply border border-primary text-primary hover:bg-primary/10 font-medium py-2 px-4 rounded-lg transition-all duration-200;
+            }
+            .input-primary {
+                @apply border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all duration-200;
+            }
+            .card {
+                @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+            }
+            .badge {
+                @apply px-2 py-1 text-xs font-medium rounded-full;
+            }
+            .badge-success {
+                @apply bg-green-100 text-green-800;
+            }
+            .badge-warning {
+                @apply bg-yellow-100 text-yellow-800;
+            }
+            .badge-info {
+                @apply bg-blue-100 text-blue-800;
+            }
+            .scrollbar-thin {
+                scrollbar-width: thin;
+                scrollbar-color: theme('colors.primary') theme('colors.gray.100');
+            }
+            .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-track {
+                background: theme('colors.gray.100');
+                border-radius: 3px;
+            }
+            .scrollbar-thin::-webkit-scrollbar-thumb {
+                background: theme('colors.primary');
+                border-radius: 3px;
+            }
+            .text-gradient {
+                @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+            }
+            .bg-gradient-primary {
+                @apply bg-gradient-to-r from-primary to-accent;
+            }
+            .shadow-glow {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 头部 -->
+        <header class="text-center mb-8 animate-fade-in">
+            <div class="inline-block p-2 bg-white rounded-full shadow-md mb-4">
+                <div class="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
+                    <i class="fa fa-search text-white text-3xl"></i>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-dark mb-2">
+                JSON文件筛选工具
+                <span class="text-gradient">可视化版</span>
+            </h1>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                从多个JSON文件中快速筛选出包含特定内容的文件，并通过直观的可视化方式展示结果
+            </p>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- 左侧：文件上传和筛选条件 -->
+            <div class="lg:col-span-1">
+                <div class="card p-6 h-full">
+                    <h2 class="text-xl font-semibold text-dark mb-6 flex items-center">
+                        <i class="fa fa-sliders text-primary mr-2"></i>控制面板
+                    </h2>
+                    
+                    <!-- 文件选择 -->
+                    <div class="mb-6">
+                        <label class="block text-gray-700 font-medium mb-2">选择JSON文件</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors duration-200 cursor-pointer" id="dropZone">
+                            <input type="file" id="fileInput" multiple accept=".json" class="hidden">
+                            <div class="space-y-2">
+                                <div class="inline-block p-3 bg-blue-100 rounded-full">
+                                    <i class="fa fa-file-text-o text-primary text-3xl"></i>
+                                </div>
+                                <p class="text-gray-600 mb-1 font-medium">点击或拖拽文件到此处</p>
+                                <p class="text-gray-400 text-sm">支持多个JSON文件</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 文件列表 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-medium text-dark">已选择的文件</h3>
+                            <span id="fileCount" class="badge badge-info">0 个文件</span>
+                        </div>
+                        <div id="fileList" class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
+                            <div class="text-center py-4 text-gray-400">
+                                <i class="fa fa-folder-open-o text-2xl mb-2 block"></i>
+                                <p class="text-sm">暂无文件</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 筛选条件 -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-dark mb-4">筛选条件</h3>
+                        
+                        <!-- 关键词输入 -->
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2">搜索关键词</label>
+                            <div class="relative">
+                                <input type="text" id="searchInput" placeholder="输入要搜索的关键词..." 
+                                    class="input-primary w-full pr-10">
+                                <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 transition-colors">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 高级筛选选项 -->
+                        <div class="border-t border-gray-100 pt-4 mt-4">
+                            <button id="advancedToggle" class="text-primary hover:text-primary/80 text-sm font-medium flex items-center w-full justify-between">
+                                <span><i class="fa fa-sliders mr-1"></i> 高级选项</span>
+                                <i class="fa fa-chevron-down transition-transform duration-200" id="advancedIcon"></i>
+                            </button>
+                            
+                            <div id="advancedOptions" class="hidden mt-4 space-y-4">
+                                <!-- 包含多个关键词 -->
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">包含全部关键词</label>
+                                    <input type="text" id="allKeywordsInput" placeholder="用逗号分隔多个关键词..." 
+                                        class="input-primary w-full">
+                                    <p class="text-gray-500 text-xs mt-1">文件必须包含所有列出的关键词</p>
+                                </div>
+
+                                <!-- 不包含关键词 -->
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">排除关键词</label>
+                                    <input type="text" id="excludeKeywordsInput" placeholder="用逗号分隔要排除的关键词..." 
+                                        class="input-primary w-full">
+                                    <p class="text-gray-500 text-xs mt-1">文件不能包含任何列出的关键词</p>
+                                </div>
+
+                                <!-- 搜索模式 -->
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">搜索模式</label>
+                                    <div class="flex space-x-4">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="searchMode" value="text" checked class="text-primary focus:ring-primary">
+                                            <span class="ml-2 text-gray-700">文本搜索</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="radio" name="searchMode" value="regex" class="text-primary focus:ring-primary">
+                                            <span class="ml-2 text-gray-700">正则表达式</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="flex space-x-2">
+                        <button id="filterBtn" class="btn-primary flex-1 group">
+                            <i class="fa fa-filter mr-1 transition-transform group-hover:rotate-90"></i> 
+                            开始筛选
+                        </button>
+                        <button id="clearBtn" class="btn-outline">
+                            <i class="fa fa-trash mr-1"></i> 清空
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：筛选结果和可视化 -->
+            <div class="lg:col-span-3">
+                <div class="space-y-6">
+                    <!-- 统计卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="card p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm">总文件数</p>
+                                    <h3 class="text-3xl font-bold" id="totalFilesCount">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                    <i class="fa fa-file-text-o"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100 text-sm">匹配文件数</p>
+                                    <h3 class="text-3xl font-bold" id="matchedFilesCount">0</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                    <i class="fa fa-check-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-purple-100 text-sm">匹配率</p>
+                                    <h3 class="text-3xl font-bold" id="matchRate">0%</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                    <i class="fa fa-percent"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 可视化图表 -->
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-dark mb-4">数据可视化</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- 饼图 -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2 text-center">匹配结果分布</h4>
+                                <div class="h-64">
+                                    <canvas id="matchDistributionChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- 柱状图 -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-600 mb-2 text-center">文件大小分布</h4>
+                                <div class="h-64">
+                                    <canvas id="fileSizeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 关键词频率分析 -->
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold text-dark mb-4">关键词频率分析</h3>
+                        <div class="h-64">
+                            <canvas id="keywordFrequencyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 结果列表 -->
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-dark">
+                                <i class="fa fa-list-alt text-primary mr-2"></i>匹配文件列表
+                            </h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-600">排序方式:</span>
+                                <select id="sortSelect" class="input-primary text-sm py-1">
+                                    <option value="name">文件名</option>
+                                    <option value="size">文件大小</option>
+                                    <option value="matches">匹配数量</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 结果列表 -->
+                        <div id="resultContainer" class="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin">
+                            <div class="text-center py-16 text-gray-500">
+                                <div class="inline-block p-4 bg-gray-50 rounded-full mb-4">
+                                    <i class="fa fa-info-circle text-3xl text-gray-300"></i>
+                                </div>
+                                <p class="text-lg">请上传文件并设置筛选条件</p>
+                                <p class="text-sm text-gray-400 mt-2">开始探索你的数据</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部 -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>© 2025 JSON文件筛选工具 | 高效、直观的数据筛选与可视化解决方案</p>
+        </footer>
+    </div>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                <h3 class="text-lg font-semibold flex items-center">
+                    <i class="fa fa-eye text-primary mr-2"></i>
+                    <span id="previewTitle">文件预览</span>
+                </h3>
+                <button id="closePreview" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)] scrollbar-thin">
+                <div class="mb-4">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="badge badge-info" id="previewFileSize"></span>
+                        <span class="badge badge-success" id="previewMatchCount"></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto">
+                        <pre id="previewContent" class="text-sm text-gray-800"></pre>
+                    </div>
+                </div>
+                
+                <!-- JSON结构可视化 -->
+                <div class="mt-6">
+                    <h4 class="text-md font-medium text-dark mb-3 flex items-center">
+                        <i class="fa fa-sitemap text-primary mr-2"></i>
+                        JSON结构可视化
+                    </h4>
+                    <div id="jsonStructure" class="bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center py-4 text-gray-400">
+                            <i class="fa fa-spinner fa-spin text-xl"></i>
+                            <p class="mt-2">正在解析JSON结构...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t bg-gray-50 flex justify-end space-x-3">
+                <button id="copyContentBtn" class="btn-outline">
+                    <i class="fa fa-copy mr-1"></i> 复制内容
+                </button>
+                <button id="downloadFileBtn" class="btn-primary">
+                    <i class="fa fa-download mr-1"></i> 下载文件
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载动画 -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="text-center">
+            <div class="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold text-dark mb-2">正在处理数据</h3>
+            <p class="text-gray-600" id="loadingMessage">请稍候...</p>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let selectedFiles = [];
+        let filteredResults = [];
+        let currentFileIndex = -1;
+        let charts = {};
+
+        // DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const fileList = document.getElementById('fileList');
+        const fileCount = document.getElementById('fileCount');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const filterBtn = document.getElementById('filterBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const totalFilesCount = document.getElementById('totalFilesCount');
+        const matchedFilesCount = document.getElementById('matchedFilesCount');
+        const matchRate = document.getElementById('matchRate');
+        const advancedToggle = document.getElementById('advancedToggle');
+        const advancedOptions = document.getElementById('advancedOptions');
+        const advancedIcon = document.getElementById('advancedIcon');
+        const previewModal = document.getElementById('previewModal');
+        const closePreview = document.getElementById('closePreview');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewContent = document.getElementById('previewContent');
+        const previewFileSize = document.getElementById('previewFileSize');
+        const previewMatchCount = document.getElementById('previewMatchCount');
+        const downloadFileBtn = document.getElementById('downloadFileBtn');
+        const copyContentBtn = document.getElementById('copyContentBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const sortSelect = document.getElementById('sortSelect');
+        const jsonStructure = document.getElementById('jsonStructure');
+
+        // 初始化
+        function init() {
+            // 文件选择事件
+            fileInput.addEventListener('change', handleFileSelect);
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            // 拖拽事件
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-primary');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-primary');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-primary');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            // 搜索按钮事件
+            searchBtn.addEventListener('click', filterFiles);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') filterFiles();
+            });
+            
+            // 筛选按钮事件
+            filterBtn.addEventListener('click', filterFiles);
+            
+            // 清空按钮事件
+            clearBtn.addEventListener('click', clearAll);
+            
+            // 高级选项切换
+            advancedToggle.addEventListener('click', () => {
+                advancedOptions.classList.toggle('hidden');
+                advancedIcon.classList.toggle('rotate-180');
+            });
+            
+            // 模态框关闭事件
+            closePreview.addEventListener('click', closePreviewModal);
+            
+            // 点击模态框外部关闭
+            previewModal.addEventListener('click', (e) => {
+                if (e.target === previewModal) {
+                    closePreviewModal();
+                }
+            });
+            
+            // 复制内容按钮
+            copyContentBtn.addEventListener('click', copyPreviewContent);
+            
+            // 排序选择
+            sortSelect.addEventListener('change', sortResults);
+            
+            // 初始化图表
+            initCharts();
+        }
+
+        // 初始化图表
+        function initCharts() {
+            // 匹配结果分布饼图
+            const matchDistributionCtx = document.getElementById('matchDistributionChart').getContext('2d');
+            charts.matchDistribution = new Chart(matchDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['匹配文件', '未匹配文件'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(209, 213, 219, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(209, 213, 219, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 文件大小分布柱状图
+            const fileSizeCtx = document.getElementById('fileSizeChart').getContext('2d');
+            charts.fileSize = new Chart(fileSizeCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '文件大小 (KB)',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' KB';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 关键词频率分析图
+            const keywordFrequencyCtx = document.getElementById('keywordFrequencyChart').getContext('2d');
+            charts.keywordFrequency = new Chart(keywordFrequencyCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '出现频率',
+                        data: [],
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 更新图表数据
+        function updateCharts(results, totalCount) {
+            const matchedCount = results.filter(r => !r.error).length;
+            const unmatchedCount = totalCount - matchedCount;
+            
+            // 更新匹配结果分布饼图
+            charts.matchDistribution.data.datasets[0].data = [matchedCount, unmatchedCount];
+            charts.matchDistribution.update();
+            
+            // 更新文件大小分布柱状图
+            const fileSizeData = results
+                .filter(r => !r.error)
+                .sort((a, b) => a.file.size - b.file.size)
+                .slice(0, 10); // 只显示前10个文件
+            
+            charts.fileSize.data.labels = fileSizeData.map(r => {
+                // 截断长文件名
+                const name = r.file.name;
+                return name.length > 15 ? name.substring(0, 12) + '...' : name;
+            });
+            charts.fileSize.data.datasets[0].data = fileSizeData.map(r => (r.file.size / 1024).toFixed(1));
+            charts.fileSize.update();
+            
+            // 更新关键词频率分析图
+            // 这里我们需要分析搜索关键词在文件中的出现频率
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                const frequencyData = results
+                    .filter(r => !r.error)
+                    .map(r => ({
+                        name: r.file.name.length > 15 ? r.file.name.substring(0, 12) + '...' : r.file.name,
+                        frequency: r.matchCount || 0
+                    }))
+                    .sort((a, b) => b.frequency - a.frequency)
+                    .slice(0, 10);
+                
+                charts.keywordFrequency.data.labels = frequencyData.map(d => d.name);
+                charts.keywordFrequency.data.datasets[0].data = frequencyData.map(d => d.frequency);
+                charts.keywordFrequency.update();
+            }
+        }
+
+        // 处理文件选择
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            const jsonFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.json'));
+            
+            if (jsonFiles.length === 0) {
+                showToast('请选择有效的JSON文件', 'warning');
+                return;
+            }
+            
+            // 添加新文件到列表
+            jsonFiles.forEach(file => {
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                }
+            });
+            
+            updateFileList();
+            updateStatistics();
+            showToast(`已添加 ${jsonFiles.length} 个文件`, 'success');
+        }
+
+        // 更新文件列表显示
+        function updateFileList() {
+            fileCount.textContent = `${selectedFiles.length} 个文件`;
+            
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = `
+                    <div class="text-center py-4 text-gray-400">
+                        <i class="fa fa-folder-open-o text-2xl mb-2 block"></i>
+                        <p class="text-sm">暂无文件</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            fileList.innerHTML = selectedFiles.map((file, index) => `
+                <div class="flex items-center justify-between bg-gray-50 rounded p-2 group hover:bg-gray-100 transition-colors">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                            <i class="fa fa-file-text-o text-primary"></i>
+                        </div>
+                        <div>
+                            <span class="text-gray-800 text-sm font-medium truncate block" title="${file.name}">${file.name}</span>
+                            <span class="text-gray-400 text-xs">${(file.size / 1024).toFixed(1)}KB</span>
+                        </div>
+                    </div>
+                    <button class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" onclick="removeFile(${index})">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // 移除文件
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateStatistics();
+            showToast('文件已移除', 'success');
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            totalFilesCount.textContent = selectedFiles.length;
+            
+            // 如果已经有筛选结果，更新匹配统计
+            if (filteredResults.length > 0) {
+                const matchedCount = filteredResults.filter(r => !r.error).length;
+                matchedFilesCount.textContent = matchedCount;
+                matchRate.textContent = selectedFiles.length > 0 
+                    ? Math.round((matchedCount / selectedFiles.length) * 100) + '%' 
+                    : '0%';
+            } else {
+                matchedFilesCount.textContent = '0';
+                matchRate.textContent = '0%';
+            }
+        }
+
+        // 清空所有
+        function clearAll() {
+            selectedFiles = [];
+            filteredResults = [];
+            searchInput.value = '';
+            document.getElementById('allKeywordsInput').value = '';
+            document.getElementById('excludeKeywordsInput').value = '';
+            document.querySelector('input[name="searchMode"]:checked').checked = true;
+            updateFileList();
+            updateStatistics();
+            
+            // 重置结果容器
+            resultContainer.innerHTML = `
+                <div class="text-center py-16 text-gray-500">
+                    <div class="inline-block p-4 bg-gray-50 rounded-full mb-4">
+                        <i class="fa fa-info-circle text-3xl text-gray-300"></i>
+                    </div>
+                    <p class="text-lg">请上传文件并设置筛选条件</p>
+                    <p class="text-sm text-gray-400 mt-2">开始探索你的数据</p>
+                </div>
+            `;
+            
+            // 重置图表
+            resetCharts();
+            
+            showToast('已清空所有内容', 'success');
+        }
+
+        // 重置图表
+        function resetCharts() {
+            charts.matchDistribution.data.datasets[0].data = [0, 0];
+            charts.matchDistribution.update();
+            
+            charts.fileSize.data.labels = [];
+            charts.fileSize.data.datasets[0].data = [];
+            charts.fileSize.update();
+            
+            charts.keywordFrequency.data.labels = [];
+            charts.keywordFrequency.data.datasets[0].data = [];
+            charts.keywordFrequency.update();
+        }
+
+        // 开始筛选
+        async function filterFiles() {
+            if (selectedFiles.length === 0) {
+                showToast('请先上传文件', 'warning');
+                return;
+            }
+
+            const searchTerm = searchInput.value.trim();
+            const allKeywords = document.getElementById('allKeywordsInput').value.trim();
+            const excludeKeywords = document.getElementById('excludeKeywordsInput').value.trim();
+            const searchMode = document.querySelector('input[name="searchMode"]:checked').value;
+
+            // 验证搜索条件
+            if (!searchTerm && !allKeywords) {
+                showToast('请输入搜索关键词', 'warning');
+                return;
+            }
+
+            // 显示加载状态
+            showLoading('正在筛选文件...');
+
+            // 处理搜索条件
+            const searchTerms = searchTerm ? [searchTerm] : [];
+            const allKeywordList = allKeywords ? allKeywords.split(',').map(k => k.trim()).filter(k => k) : [];
+            const excludeKeywordList = excludeKeywords ? excludeKeywords.split(',').map(k => k.trim()).filter(k => k) : [];
+
+            // 合并所有必须包含的关键词
+            const mustInclude = [...searchTerms, ...allKeywordList];
+
+            // 开始筛选
+            let matchedCount = 0;
+            filteredResults = [];
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                // 更新加载消息
+                updateLoadingMessage(`正在处理文件 ${i + 1}/${selectedFiles.length}...`);
+                
+                const file = selectedFiles[i];
+                try {
+                    const content = await readFileAsText(file);
+                    let isMatch = true;
+
+                    // 检查必须包含的关键词
+                    if (mustInclude.length > 0) {
+                        for (const term of mustInclude) {
+                            if (searchMode === 'text') {
+                                if (!content.toLowerCase().includes(term.toLowerCase())) {
+                                    isMatch = false;
+                                    break;
+                                }
+                            } else {
+                                // 正则表达式模式
+                                try {
+                                    const regex = new RegExp(term, 'i');
+                                    if (!regex.test(content)) {
+                                        isMatch = false;
+                                        break;
+                                    }
+                                } catch (e) {
+                                    hideLoading();
+                                    showToast(`正则表达式 "${term}" 无效`, 'warning');
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    // 检查排除的关键词
+                    if (isMatch && excludeKeywordList.length > 0) {
+                        for (const term of excludeKeywordList) {
+                            if (searchMode === 'text') {
+                                if (content.toLowerCase().includes(term.toLowerCase())) {
+                                    isMatch = false;
+                                    break;
+                                }
+                            } else {
+                                // 正则表达式模式
+                                try {
+                                    const regex = new RegExp(term, 'i');
+                                    if (regex.test(content)) {
+                                        isMatch = false;
+                                        break;
+                                    }
+                                } catch (e) {
+                                    hideLoading();
+                                    showToast(`正则表达式 "${term}" 无效`, 'warning');
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                    if (isMatch) {
+                        matchedCount++;
+                        
+                        // 提取匹配的内容片段
+                        const snippet = extractSnippet(content, mustInclude, 150);
+                        
+                        filteredResults.push({
+                            file: file,
+                            snippet: snippet,
+                            matchCount: countMatches(content, mustInclude, searchMode),
+                            content: content
+                        });
+                    } else {
+                        // 即使不匹配，也添加到结果中但标记为不匹配
+                        filteredResults.push({
+                            file: file,
+                            snippet: '',
+                            matchCount: 0,
+                            content: content,
+                            matched: false
+                        });
+                    }
+                } catch (error) {
+                    console.error(`处理文件 ${file.name} 时出错:`, error);
+                    filteredResults.push({
+                        file: file,
+                        error: '无法解析JSON文件',
+                        snippet: '',
+                        content: ''
+                    });
+                }
+            }
+
+            // 更新结果显示
+            updateResults(filteredResults, matchedCount);
+            
+            // 更新统计信息
+            updateStatistics();
+            
+            // 更新图表
+            updateCharts(filteredResults, selectedFiles.length);
+            
+            // 隐藏加载状态
+            hideLoading();
+        }
+
+        // 读取文件内容
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        // 提取匹配片段
+        function extractSnippet(content, searchTerms, maxLength) {
+            if (!searchTerms || searchTerms.length === 0) {
+                return content.substring(0, maxLength) + (content.length > maxLength ? '...' : '');
+            }
+
+            // 查找第一个匹配的位置
+            let firstMatchIndex = content.length;
+            for (const term of searchTerms) {
+                const index = content.toLowerCase().indexOf(term.toLowerCase());
+                if (index !== -1 && index < firstMatchIndex) {
+                    firstMatchIndex = index;
+                }
+            }
+
+            if (firstMatchIndex === content.length) {
+                return content.substring(0, maxLength) + (content.length > maxLength ? '...' : '');
+            }
+
+            // 提取包含匹配项的片段
+            const start = Math.max(0, firstMatchIndex - maxLength / 2);
+            const end = Math.min(content.length, start + maxLength);
+            
+            let snippet = content.substring(start, end);
+            if (start > 0) snippet = '...' + snippet;
+            if (end < content.length) snippet += '...';
+            
+            return snippet;
+        }
+
+        // 计算匹配次数
+        function countMatches(content, searchTerms, searchMode) {
+            let count = 0;
+            
+            for (const term of searchTerms) {
+                if (searchMode === 'text') {
+                    const regex = new RegExp(escapeRegExp(term), 'gi');
+                    const matches = content.match(regex);
+                    count += matches ? matches.length : 0;
+                } else {
+                    try {
+                        const regex = new RegExp(term, 'gi');
+                        const matches = content.match(regex);
+                        count += matches ? matches.length : 0;
+                    } catch (e) {
+                        console.error(`无效的正则表达式: ${term}`, e);
+                    }
+                }
+            }
+            
+            return count;
+        }
+
+        // 转义正则表达式特殊字符
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // 更新结果显示
+        function updateResults(results, matchedCount) {
+            // 只保留匹配的文件
+            const matchedResults = results.filter(r => r.matched !== false && !r.error);
+            
+            // 按文件名排序
+            matchedResults.sort((a, b) => a.file.name.localeCompare(b.file.name));
+
+            if (matchedResults.length === 0) {
+                resultContainer.innerHTML = `
+                    <div class="text-center py-16 text-gray-500">
+                        <div class="inline-block p-4 bg-gray-50 rounded-full mb-4">
+                            <i class="fa fa-search text-3xl text-gray-300"></i>
+                        </div>
+                        <p class="text-lg">没有找到匹配的文件</p>
+                        <p class="text-sm text-gray-400 mt-2">尝试调整筛选条件</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 简化的结果显示，只显示匹配的文件名
+            resultContainer.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-center">
+                        <i class="fa fa-check-circle text-green-500 mr-2"></i>
+                        <span class="text-green-800 font-medium">找到 ${matchedResults.length} 个匹配的文件</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    ${matchedResults.map((result, index) => `
+                        <div class="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all duration-200 hover:border-primary cursor-pointer group" onclick="previewFile(${results.findIndex(r => r.file.name === result.file.name)})">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2 group-hover:bg-primary/10 transition-colors">
+                                        <i class="fa fa-file-text-o text-green-500 group-hover:text-primary transition-colors"></i>
+                                    </div>
+                                    <span class="font-medium text-gray-800 truncate" title="${result.file.name}">${result.file.name}</span>
+                                </div>
+                                <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="badge badge-success text-xs">${result.matchCount || 0} 处</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-6 flex justify-center">
+                    <button id="copyAllNamesBtn" class="btn-outline">
+                        <i class="fa fa-copy mr-1"></i> 复制所有文件名
+                    </button>
+                </div>
+            `;
+            
+            // 添加复制所有文件名的事件监听
+            document.getElementById('copyAllNamesBtn').addEventListener('click', () => {
+                const allNames = matchedResults.map(r => r.file.name).join('\n');
+                navigator.clipboard.writeText(allNames)
+                    .then(() => {
+                        showToast('所有文件名已复制到剪贴板', 'success');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showToast('复制失败，请手动复制', 'error');
+                    });
+            });
+        }
+
+        // 高亮匹配内容
+        function highlightMatches(text, searchTerms) {
+            if (!searchTerms || searchTerms.length === 0) {
+                return text;
+            }
+
+            let highlightedText = text;
+            
+            // 按长度排序，优先高亮较长的关键词
+            const sortedTerms = [...searchTerms].sort((a, b) => b.length - a.length);
+            
+            for (const term of sortedTerms) {
+                const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+                highlightedText = highlightedText.replace(regex, '<mark class="bg-yellow-200 px-0.5 rounded">$1</mark>');
+            }
+            
+            return highlightedText;
+        }
+
+        // 排序结果
+        function sortResults() {
+            const sortBy = sortSelect.value;
+            
+            if (filteredResults.length === 0) return;
+            
+            // 只对匹配的文件进行排序
+            const matchedResults = filteredResults.filter(r => r.matched !== false && !r.error);
+            
+            switch (sortBy) {
+                case 'name':
+                    matchedResults.sort((a, b) => a.file.name.localeCompare(b.file.name));
+                    break;
+                    
+                case 'size':
+                    matchedResults.sort((a, b) => b.file.size - a.file.size);
+                    break;
+                    
+                case 'matches':
+                    matchedResults.sort((a, b) => (b.matchCount || 0) - (a.matchCount || 0));
+                    break;
+            }
+            
+            // 更新结果显示
+            updateResults(filteredResults, matchedResults.length);
+        }
+
+        // 预览文件
+        function previewFile(index) {
+            const result = filteredResults[index];
+            if (!result) {
+                showToast('文件未找到', 'error');
+                return;
+            }
+
+            const file = result.file;
+            currentFileIndex = index;
+            
+            // 设置预览标题和信息
+            previewTitle.textContent = `预览: ${file.name}`;
+            previewFileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+            
+            if (result.matchCount) {
+                previewMatchCount.textContent = `${result.matchCount} 处匹配`;
+                previewMatchCount.classList.remove('hidden');
+            } else {
+                previewMatchCount.classList.add('hidden');
+            }
+            
+            // 设置预览内容
+            if (result.error) {
+                previewContent.textContent = '无法解析此JSON文件。可能是格式错误或文件已损坏。';
+                previewContent.classList.add('text-red-500');
+            } else {
+                // 格式化JSON
+                try {
+                    const parsedJSON = JSON.parse(result.content);
+                    previewContent.textContent = JSON.stringify(parsedJSON, null, 2);
+                    previewContent.classList.remove('text-red-500');
+                } catch (e) {
+                    previewContent.textContent = result.content;
+                    previewContent.classList.remove('text-red-500');
+                }
+            }
+            
+            // 生成JSON结构可视化
+            generateJSONStructure(result.content);
+            
+            // 显示预览模态框
+            previewModal.classList.remove('hidden');
+        }
+
+        // 生成JSON结构可视化
+        function generateJSONStructure(content) {
+            jsonStructure.innerHTML = `
+                <div class="text-center py-4 text-gray-400">
+                    <i class="fa fa-spinner fa-spin text-xl"></i>
+                    <p class="mt-2">正在解析JSON结构...</p>
+                </div>
+            `;
+            
+            try {
+                const parsedJSON = JSON.parse(content);
+                const structureHTML = generateStructureHTML(parsedJSON, 0);
+                
+                jsonStructure.innerHTML = `
+                    <div class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">
+                        ${structureHTML}
+                    </div>
+                `;
+            } catch (e) {
+                jsonStructure.innerHTML = `
+                    <div class="text-center py-4 text-red-400">
+                        <i class="fa fa-exclamation-circle text-xl"></i>
+                        <p class="mt-2">无法解析JSON结构</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 递归生成结构HTML
+        function generateStructureHTML(obj, level) {
+            const indent = ' '.repeat(level * 4);
+            const isArray = Array.isArray(obj);
+            
+            if (obj === null) {
+                return `<div class="text-gray-500 pl-${level * 4}">- null</div>`;
+            }
+            
+            if (typeof obj !== 'object') {
+                const value = typeof obj === 'string' ? `"${obj}"` : String(obj);
+                const typeClass = typeof obj === 'string' ? 'text-green-600' : 
+                                 typeof obj === 'number' ? 'text-blue-600' : 
+                                 typeof obj === 'boolean' ? 'text-purple-600' : 'text-gray-600';
+                
+                return `<div class="pl-${level * 4}">- <span class="${typeClass}">${value}</span></div>`;
+            }
+            
+            const keys = Object.keys(obj);
+            const typeIcon = isArray ? '[]' : '{}';
+            const typeLabel = isArray ? 'Array' : 'Object';
+            const itemCount = isArray ? obj.length : keys.length;
+            
+            let html = `
+                <div class="pl-${level * 4}">
+                    <div class="flex items-center cursor-pointer hover:text-primary structure-toggle">
+                        <i class="fa fa-chevron-right mr-1 text-xs transition-transform duration-200 structure-icon"></i>
+                        <span class="font-medium text-gray-700">${typeIcon} ${typeLabel} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})</span>
+                    </div>
+                    <div class="structure-content hidden mt-1">
+            `;
+            
+            if (isArray) {
+                obj.forEach((item, index) => {
+                    html += generateStructureHTML(item, level + 1);
+                });
+            } else {
+                keys.forEach(key => {
+                    html += `
+                        <div class="pl-${level * 4 + 4}">
+                            <div class="text-gray-800 font-medium">${key}:</div>
+                            ${generateStructureHTML(obj[key], level + 1)}
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // 添加结构折叠/展开功能
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.structure-toggle')) {
+                const toggle = e.target.closest('.structure-toggle');
+                const content = toggle.nextElementSibling;
+                const icon = toggle.querySelector('.structure-icon');
+                
+                content.classList.toggle('hidden');
+                icon.classList.toggle('rotate-90');
+            }
+        });
+
+        // 关闭预览
+        function closePreviewModal() {
+            previewModal.classList.add('hidden');
+            currentFileIndex = -1;
+        }
+
+        // 复制预览内容
+        function copyPreviewContent() {
+            const content = previewContent.textContent;
+            
+            navigator.clipboard.writeText(content)
+                .then(() => {
+                    showToast('内容已复制到剪贴板', 'success');
+                })
+                .catch(err => {
+                    console.error('复制失败:', err);
+                    showToast('复制失败，请手动复制', 'error');
+                });
+        }
+
+        // 下载文件
+        function downloadFile(index) {
+            const result = filteredResults[index];
+            if (!result) {
+                showToast('文件未找到', 'error');
+                return;
+            }
+
+            const file = result.file;
+
+            // 创建下载链接
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('文件下载已开始', 'success');
+        }
+
+        // 显示加载状态
+        function showLoading(message) {
+            loadingMessage.textContent = message || '请稍候...';
+            loadingOverlay.classList.remove('hidden');
+        }
+
+        // 更新加载消息
+        function updateLoadingMessage(message) {
+            loadingMessage.textContent = message;
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info') {
+            // 创建提示元素
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            
+            // 设置样式
+            switch (type) {
+                case 'success':
+                    toast.classList.add('bg-green-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-check-circle mr-2"></i>${message}`;
+                    break;
+                case 'warning':
+                    toast.classList.add('bg-yellow-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-exclamation-triangle mr-2"></i>${message}`;
+                    break;
+                case 'error':
+                    toast.classList.add('bg-red-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-times-circle mr-2"></i>${message}`;
+                    break;
+                default:
+                    toast.classList.add('bg-blue-500', 'text-white');
+                    toast.innerHTML = `<i class="fa fa-info-circle mr-2"></i>${message}`;
+            }
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 显示动画
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 10);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

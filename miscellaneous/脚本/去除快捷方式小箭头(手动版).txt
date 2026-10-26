@@ -1,0 +1,33 @@
+📌 方法一：替换图标叠加层（推荐）
+这个方法是通过修改 Shell Icons 下的 29 号字符串值，让系统用一个透明图标来覆盖小箭头。
+
+手动操作步骤：
+按 Win + R，输入 regedit 回车，打开注册表编辑器。
+
+定位到路径：
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Icons
+（如果 Explorer 下没有 Shell Icons，就右键 Explorer → 新建 → 项，命名为 Shell Icons）。
+
+在右侧空白处右键 → 新建 → 字符串值，命名为 29。
+
+双击 29，将“数值数据”改为以下任一透明图标路径：
+
+%systemroot%\system32\imageres.dll,197 
+
+%SystemRoot%\System32\shell32.dll,-50 
+
+确定后关闭注册表，重启电脑或重启资源管理器即可生效。
+
+
+📌 方法二：删除 IsShortcut 键值
+这个方法直接删掉系统用来标记“这是一个快捷方式”的键值，使箭头消失。
+
+操作步骤：
+
+打开注册表编辑器。
+
+定位到 HKEY_CLASSES_ROOT\lnkfile，在右侧找到 IsShortcut，右键删除。
+
+（可选）定位到 HKEY_CLASSES_ROOT\piffile，同样删除右侧的 IsShortcut。
+
+重启电脑生效

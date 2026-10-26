@@ -1,0 +1,1 @@
+start "" /d "E:\666\za\ERROR 408\error408" "E:\666\za\ERROR 408\error408\ERROR 408.exe"
