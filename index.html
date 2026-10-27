@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>📁 文件索引</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--panel2:#1c2128;--border:#30363d;
+  --fg:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--hover:#21262d;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--fg);font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,17,23,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);padding:14px 20px;
+}
+.hd{max-width:1120px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{font-size:16px;font-weight:700;white-space:nowrap;letter-spacing:.3px}
+.logo b{color:var(--accent)}
+.searchwrap{flex:1;position:relative;min-width:180px}
+.searchwrap::before{
+  content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  font-size:13px;opacity:.6;pointer-events:none;
+}
+#q{
+  width:100%;padding:9px 14px 9px 36px;border-radius:8px;
+  border:1px solid var(--border);background:var(--panel);color:var(--fg);
+  font-size:14px;font-family:inherit;outline:none;transition:.18s;
+}
+#q:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.16);background:#0d1117}
+.src{
+  font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:20px;
+  padding:2px 10px;white-space:nowrap;max-width:42vw;overflow:hidden;text-overflow:ellipsis;
+}
+.src.ok{color:#3fb950;border-color:rgba(63,185,80,.4)}
+main{max-width:1120px;margin:0 auto;padding:18px 20px 60px}
+.tree{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px 4px}
+
+details.dir{margin:0}
+details.dir>summary{
+  list-style:none;cursor:pointer;padding:5px 10px;border-radius:7px;
+  display:flex;align-items:center;gap:8px;font-weight:600;
+  user-select:none;transition:background .12s;
+}
+details.dir>summary::-webkit-details-marker{display:none}
+details.dir>summary:hover{background:var(--hover)}
+details.dir>summary::before{
+  content:"";width:0;height:0;
+  border-left:5px solid var(--dim);
+  border-top:4px solid transparent;border-bottom:4px solid transparent;
+  transition:transform .15s;flex-shrink:0;
+}
+details.dir[open]>summary::before{transform:rotate(90deg)}
+.nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cnt{
+  font-size:11px;color:var(--dim);background:var(--panel2);
+  border:1px solid var(--border);padding:0 7px;border-radius:20px;
+  font-weight:400;flex-shrink:0;
+}
+.kids{margin-left:16px;border-left:1px solid var(--border);padding-left:6px}
+
+a.file{
+  display:flex;align-items:center;gap:8px;padding:4px 10px;margin:1px 0;
+  border-radius:7px;text-decoration:none;color:var(--fg);
+  transition:background .12s,color .12s;
+}
+a.file:hover{background:var(--hover);color:var(--accent)}
+a.file .ic{font-size:13px;flex-shrink:0;opacity:.85}
+a.file .nm{font-weight:400;font-size:13.5px}
+a.file:hover .nm{text-decoration:underline;text-underline-offset:2px}
+
+.hide{display:none!important}
+#status{text-align:center;color:var(--dim);padding:60px 20px;font-size:14px}
+.spinner{
+  width:28px;height:28px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#empty{text-align:center;color:var(--dim);padding:60px 20px}
+footer{text-align:center;color:var(--dim);font-size:12px;padding:10px 20px 40px}
+kbd{
+  background:var(--panel2);border:1px solid var(--border);border-bottom-width:2px;
+  border-radius:4px;padding:1px 5px;font-size:11px;font-family:inherit;
+}
+code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
+@media(max-width:600px){
+  .kids{margin-left:8px;padding-left:4px}
+  .src{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="logo">📁 <b>文件索引</b></div>
+    <div class="searchwrap">
+      <input id="q" type="search" placeholder="搜索文件…  ( 按 / 聚焦 )" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="src" id="src">加载中…</div>
+  </div>
+</header>
+
+<main>
+  <div id="status"><div class="spinner"></div>正在加载文件索引…</div>
+  <div class="tree" id="tree" hidden></div>
+  <div id="empty" hidden>没有找到匹配的文件 🤷</div>
+</main>
+
+<footer>按 <kbd>/</kbd> 聚焦搜索 · <kbd>Esc</kbd> 清空</footer>
+
+<script>
+/* ============================================================
+   配置区：留空则自动识别 GitHub Pages 的 owner / repo
+   ============================================================ */
+const CONFIG = {
+  owner:  '',              // 如 'yourname'
+  repo:   '',              // 如 'my-files'
+  branch: '',              // 留空取仓库默认分支
+  // 数据源优先级，想只用 JSON 就删掉后面的
+  sources: ['index.json', 'api', 'folder_structure.txt']
+};
+
+/* ---------------- 基础工具 ---------------- */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+const FILE_ICONS = {
+  exe:'⚙️',msi:'⚙️',zip:'🗜️',rar:'🗜️','7z':'🗜️',apk:'📱',
+  mp3:'🎵',flac:'🎵',wav:'🎵',lrc:'🎼',
+  mp4:'🎬',mkv:'🎬',avi:'🎬',wtv:'🎬',mov:'🎬',webm:'🎬',
+  png:'🖼️',jpg:'🖼️',jpeg:'🖼️',gif:'🖼️',webp:'🖼️',bmp:'🖼️',ico:'🖼️',jfif:'🖼️',svg:'🖼️',
+  txt:'📄',md:'📝',pdf:'📕',pptx:'📊',docx:'📘',xlsx:'📗',
+  json:'🧾',html:'🌐',htm:'🌐',xml:'🧾',url:'🌐',
+  lnk:'🔗',cmd:'⌨️',bat:'⌨️',ps1:'⌨️',py:'🐍',js:'🟨',css:'🎨',
+  ttf:'🔤',otf:'🔤',ani:'🖱️',cur:'🖱️',inf:'⚙️',
+  dll:'📦',pdb:'📦',config:'⚙️',avi:'🎬'
+};
+function iconFor(name){
+  const i = name.lastIndexOf('.');
+  const ext = i > -1 ? name.slice(i + 1).toLowerCase() : '';
+  return FILE_ICONS[ext] || '📄';
+}
+
+/* ============================================================
+   数据源 1：GitHub API
+   ============================================================ */
+function detectRepo(){
+  const o = CONFIG.owner.trim(), r = CONFIG.repo.trim();
+  if(o && r) return {owner:o, repo:r};
+  const host = location.hostname;
+  if(!host.endsWith('.github.io')) return null;
+  const owner = host.slice(0, -'.github.io'.length);
+  const segs = location.pathname.split('/').filter(Boolean);
+  const repo = (segs.length && !segs[0].includes('.')) ? segs[0] : `${owner}.github.io`;
+  return {owner, repo};
+}
+
+async function loadFromAPI(){
+  const info = detectRepo();
+  if(!info) throw new Error('未识别到仓库，请在 CONFIG 里填 owner/repo');
+  const {owner, repo} = info;
+
+  const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+    headers:{'Accept':'application/vnd.github+json'}
+  });
+  if(!repoRes.ok){
+    if(repoRes.status === 403) throw new Error('API 速率超限，请稍后或改用 index.json');
+    if(repoRes.status === 404) throw new Error('仓库不存在或为私有');
+    throw new Error('API ' + repoRes.status);
+  }
+  const repoInfo = await repoRes.json();
+  const branch = CONFIG.branch || repoInfo.default_branch || 'main';
+
+  const treeRes = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+    {headers:{'Accept':'application/vnd.github+json'}}
+  );
+  if(!treeRes.ok) throw new Error('获取文件树失败 ' + treeRes.status);
+  const treeData = await treeRes.json();
+
+  const paths = (treeData.tree || [])
+    .filter(x => x.type === 'blob')
+    .map(x => x.path);
+  if(!paths.length) throw new Error('仓库中没有文件');
+
+  return {
+    nodes: treeFromPaths(paths),
+    label: `GitHub API · ${owner}/${repo}@${branch}` + (treeData.truncated ? '（已截断）' : '')
+  };
+}
+
+/* 扁平路径数组 → 嵌套树 */
+function treeFromPaths(paths){
+  const root = {children: [], _map: new Map()};
+  for(const p of paths){
+    const parts = p.split('/');
+    let cur = root;
+    for(let i = 0; i < parts.length; i++){
+      const isFile = i === parts.length - 1;
+      const part = parts[i];
+      let node = cur._map.get(part);
+      if(!node){
+        node = {name: part};
+        if(!isFile) node.children = [];
+        cur._map.set(part, node);
+        cur.children.push(node);
+      } else if(!isFile && !node.children){
+        node.children = [];
+      }
+      if(!isFile){
+        if(!node._map) node._map = new Map();
+        cur = node;
+      }
+    }
+  }
+  const strip = n => { delete n._map; if(n.children) n.children.forEach(strip); };
+  strip(root);
+  return root.children;
+}
+
+/* ============================================================
+   数据源 2：index.json
+   支持三种格式，自动识别：
+   ① {"children":[{"name":"App","children":[...]}]}
+   ② {"files":["App/a.exe","lnk/b.lnk"]}
+   ③ ["App/a.exe","lnk/b.lnk"]
+   ============================================================ */
+function normNode(n){
+  if(typeof n === 'string') return {name: n};
+  const name = n.name ?? n.path ?? '';
+  if(Array.isArray(n.children)) return {name, children: n.children.map(normNode)};
+  return {name};
+}
+function normalizeJson(data){
+  if(Array.isArray(data)){
+    if(data.every(x => typeof x === 'string')) return treeFromPaths(data);
+    return data.map(normNode);
+  }
+  if(data && Array.isArray(data.children)) return data.children.map(normNode);
+  if(data && Array.isArray(data.files))    return treeFromPaths(data.files);
+  throw new Error('index.json 格式无法识别');
+}
+async function loadFromJson(){
+  const res = await fetch('index.json', {cache:'no-cache'});
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return {nodes: normalizeJson(await res.json()), label: 'index.json'};
+}
+
+/* ============================================================
+   数据源 3：folder_structure.txt（tree /f 输出）
+   ============================================================ */
+function parseTree(txt){
+  const root = [];
+  const stack = [{depth: -1, children: root}];
+  let started = false;
+
+  for(const raw of txt.split(/\r?\n/)){
+    const line = raw.replace(/\s+$/, '');
+    if(!started){
+      if(line.trim() === 'E:.') started = true;
+      continue;
+    }
+    if(!line.trim()) continue;
+
+    const md = line.match(/^((?:\|   |    )*)([+\\])---(.*)$/);
+    if(md){
+      const depth = md[1].length / 4;
+      const name  = md[3].trim();
+      while(stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+      const node = {name, children: []};
+      stack[stack.length - 1].children.push(node);
+      stack.push({depth, children: node.children});
+      continue;
+    }
+    const mf = line.match(/^((?:\|   |    )*)(.+)$/);
+    if(!mf) continue;
+    const depth = mf[1].length / 4 - 1;
+    const name  = mf[2].trim();
+    if(!name) continue;
+    while(stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+    stack[stack.length - 1].children.push({name});
+  }
+  return root;
+}
+async function loadFromTxt(){
+  const res = await fetch('folder_structure.txt', {cache:'no-cache'});
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const buf = await res.arrayBuffer();
+  let text = new TextDecoder('utf-8').decode(buf);
+  if(text.includes('\uFFFD')){
+    try{ text = new TextDecoder('gbk').decode(buf); }catch(_){}
+  }
+  return {nodes: parseTree(text), label: 'folder_structure.txt'};
+}
+
+/* ============================================================
+   统一加载
+   ============================================================ */
+const LOADERS = {
+  'api': loadFromAPI,
+  'index.json': loadFromJson,
+  'folder_structure.txt': loadFromTxt
+};
+
+async function loadAll(){
+  const errors = [];
+  for(const src of CONFIG.sources){
+    const fn = LOADERS[src];
+    if(!fn) continue;
+    try{
+      const result = await fn();
+      if(result && result.nodes && result.nodes.length) return result;
+      errors.push(`${src}: 空结果`);
+    }catch(e){
+      errors.push(`${src}: ${e.message}`);
+      console.warn('[索引] 数据源失败：' + src, e);
+    }
+  }
+  throw new Error(errors.join(' ｜ '));
+}
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function sortTree(nodes){
+  nodes.sort((a, b) => {
+    const ad = !!a.children, bd = !!b.children;
+    if(ad !== bd) return ad ? -1 : 1;
+    return a.name.localeCompare(b.name, 'zh-CN', {numeric: true});
+  });
+  for(const n of nodes) if(n.children) sortTree(n.children);
+}
+function countFiles(node){
+  if(!node.children) return 1;
+  let n = 0;
+  for(const c of node.children) n += countFiles(c);
+  return n;
+}
+function fileUrl(path){
+  return path.split('/').map(encodeURIComponent).join('/');
+}
+function renderNode(node, parentPath, depth){
+  if(!node.children){
+    const p = parentPath ? parentPath + '/' + node.name : node.name;
+    return `<a class="file" href="${fileUrl(p)}" target="_blank" rel="noopener"` +
+           ` data-path="${esc(p.toLowerCase())}" title="${esc(p)}">` +
+           `<span class="ic">${iconFor(node.name)}</span>` +
+           `<span class="nm">${esc(node.name)}</span></a>`;
+  }
+  const p = parentPath ? parentPath + '/' + node.name : node.name;
+  return `<details class="dir" data-depth="${depth}"${depth === 0 ? ' open' : ''}>` +
+    `<summary><span>${depth === 0 ? '📂' : '📁'}</span>` +
+    `<span class="nm">${esc(node.name)}</span>` +
+    `<span class="cnt">${countFiles(node)}</span></summary>` +
+    `<div class="kids">${node.children.map(k => renderNode(k, p, depth + 1)).join('')}</div>` +
+    `</details>`;
+}
+
+/* ============================================================
+   搜索过滤
+   ============================================================ */
+let dirCache = null;
+
+function doFilter(q){
+  q = q.trim().toLowerCase();
+  const treeEl = document.getElementById('tree');
+  const empty  = document.getElementById('empty');
+  const files  = treeEl.querySelectorAll('a.file');
+
+  if(!dirCache) dirCache = Array.from(treeEl.querySelectorAll('details.dir'));
+
+  if(!q){
+    files.forEach(f => f.classList.remove('hide'));
+    dirCache.forEach(d => {
+      d.classList.remove('hide');
+      d.open = d.dataset.depth === '0';
+    });
+    empty.hidden = true;
+    return;
+  }
+
+  let visible = 0;
+  files.forEach(f => {
+    const hit = f.dataset.path.includes(q);
+    f.classList.toggle('hide', !hit);
+    if(hit) visible++;
+  });
+
+  // 自底向上：子孙里有可见文件，目录就显示
+  const sorted = dirCache.slice().sort(
+    (a, b) => Number(b.dataset.depth) - Number(a.dataset.depth)
+  );
+  for(const d of sorted){
+    let has = false;
+    for(const f of d.querySelectorAll('a.file')){
+      if(!f.classList.contains('hide')){ has = true; break; }
+    }
+    d.classList.toggle('hide', !has);
+    if(has) d.open = true;
+  }
+
+  empty.hidden = visible > 0;
+}
+
+/* ============================================================
+   启动
+   ============================================================ */
+(async function init(){
+  const statusEl = document.getElementById('status');
+  const treeEl   = document.getElementById('tree');
+  const srcEl    = document.getElementById('src');
+
+  try{
+    const result = await loadAll();
+    const nodes = result.nodes;
+    sortTree(nodes);
+
+    treeEl.innerHTML = nodes.map(n => renderNode(n, '', 0)).join('');
+    dirCache = null;
+
+    let total = 0;
+    for(const n of nodes) total += countFiles(n);
+
+    srcEl.textContent = `${result.label} · ${total} 个文件`;
+    srcEl.classList.add('ok');
+
+    statusEl.hidden = true;
+    treeEl.hidden = false;
+  }catch(err){
+    srcEl.textContent = '加载失败';
+    statusEl.innerHTML =
+      `<p>❌ 没有可用的数据源</p>` +
+      `<p style="margin-top:10px;font-size:12px">${esc(err.message)}</p>` +
+      `<p style="margin-top:14px;font-size:12px;color:var(--dim)">` +
+      `提示：本地以 <code>file://</code> 打开时无法 fetch，` +
+      `请用本地服务器（如 <code>python -m http.server</code>）或直接部署到 GitHub Pages。</p>`;
+    console.error(err);
+  }
+})();
+
+/* ============================================================
+   交互
+   ============================================================ */
+const q = document.getElementById('q');
+let timer = null;
+q.addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => doFilter(q.value), 110);
+});
+document.addEventListener('keydown', e => {
+  if(e.key === '/' && document.activeElement !== q){
+    e.preventDefault(); q.focus(); q.select();
+  }
+  if(e.key === 'Escape' && document.activeElement === q){
+    q.value = ''; doFilter(''); q.blur();
+  }
+});
+</script>
+</body>
+</html>
