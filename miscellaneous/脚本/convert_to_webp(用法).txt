@@ -1,0 +1,5 @@
+# 默认质量 80
+python convert_to_webp.py
+
+# 自定义质量，例如 75
+python convert_to_webp.py 750
