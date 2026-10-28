@@ -1,0 +1,47 @@
+# .indexignore —— 类 .gitignore 语法
+# 空行和 # 开头的行忽略
+# 规则按顺序匹配，最后命中的生效
+# ! 开头表示重新包含
+# 末尾 / 表示只匹配目录
+# 开头 / 表示只从根目录算起
+# 含 / 的规则视为完整路径规则
+# 支持 *  ?  **  [] 的通配
+
+#语法说明
+#写法	含义	示例
+#foo	任意层级的 foo（文件或目录）	命中 foo、a/foo、a/b/foo
+#foo/	任意层级的目录 foo	命中 foo/、a/foo/，不命中 foo.txt
+#/foo	仅根目录的 foo	命中根下 foo，不命中 a/foo
+#foo/bar	路径规则（含 /）	只命中根下 foo/bar
+#**/foo	任意层级	命中 foo、a/foo、a/b/foo
+#foo/**/bar	中间任意层级	命中 foo/bar、foo/x/bar、foo/x/y/bar
+#*.log	任意层级所有 .log 文件	
+#! 前缀	重新包含（覆盖前面的规则）	
+## 开头	注释
+
+# ===== 版本控制 / 编辑器 =====
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+*.tmp
+
+# ===== 构建产物 / 依赖 / 缓存 =====
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ===== 脚本自身（保留可选的 gen_index.bat 可删除）=====
+gen_index.py
+
+# ===== 系统垃圾 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 示例：想完全排除两个大目录 =====
+# music/
+# video/
