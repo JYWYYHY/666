@@ -118,15 +118,20 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
 
 <script>
 /* ============================================================
-   配置区：留空则自动识别 GitHub Pages 的 owner / repo
+   配置区
    ============================================================ */
 const CONFIG = {
-  owner:  '',              // 如 'yourname'
-  repo:   '',              // 如 'my-files'
-  branch: '',              // 留空取仓库默认分支
-  // 数据源优先级，想只用 JSON 就删掉后面的
-  sources: ['api', 'index.json', 'folder_structure.txt']
+  owner:  '',               // 如 'yourname'，留空自动从 xxx.github.io 推断
+  repo:   '',               // 如 'my-files'
+  branch: '',               // 留空取默认分支
+  sources: ['index.json', 'api', 'folder_structure.txt'],
+
+  ignoreFile: '.indexignore',   // 排除规则文件（相对页面）
+  applyIgnoreFile: true,        // 是否在前端再应用一次排除规则
 };
+
+/* 无论如何都不进索引的文件（与 gen_index.py 保持一致） */
+const MUST_EXCLUDE = new Set(['index.json', 'gen_index.py', '.indexignore']);
 
 /* ---------------- 基础工具 ---------------- */
 function esc(s){
@@ -144,7 +149,7 @@ const FILE_ICONS = {
   json:'🧾',html:'🌐',htm:'🌐',xml:'🧾',url:'🌐',
   lnk:'🔗',cmd:'⌨️',bat:'⌨️',ps1:'⌨️',py:'🐍',js:'🟨',css:'🎨',
   ttf:'🔤',otf:'🔤',ani:'🖱️',cur:'🖱️',inf:'⚙️',
-  dll:'📦',pdb:'📦',config:'⚙️',avi:'🎬'
+  dll:'📦',pdb:'📦',config:'⚙️'
 };
 function iconFor(name){
   const i = name.lastIndexOf('.');
@@ -153,13 +158,127 @@ function iconFor(name){
 }
 
 /* ============================================================
+   .indexignore 解析（与 gen_index.py 行为对齐）
+   ============================================================ */
+const RE_ESCAPE = /[\\^$.*+?()[\]{}|]/g;
+const escapeRe = s => s.replace(RE_ESCAPE, '\\$&');
+
+class IgnoreRule {
+  constructor(line){
+    let p = line;
+    this.negate = p.startsWith('!');
+    if (this.negate) p = p.slice(1);
+
+    this.dirOnly = p.endsWith('/');
+    if (this.dirOnly) p = p.slice(0, -1);
+
+    this.rootOnly = p.startsWith('/');
+    if (this.rootOnly) p = p.slice(1);
+
+    this.hasSlash = p.includes('/');
+    this.regex = new RegExp('^' + this._compile(p) + '$');
+  }
+
+  _compile(pat){
+    let out = '', i = 0;
+    while (i < pat.length){
+      const c = pat[i];
+      if (c === '*'){
+        if (pat[i + 1] === '*'){
+          if (pat[i + 2] === '/'){ out += '(?:.*/)?'; i += 3; }
+          else                   { out += '.*';       i += 2; }
+        } else                   { out += '[^/]*';    i += 1; }
+      }
+      else if (c === '?'){ out += '[^/]'; i += 1; }
+      else if (c === '['){
+        let j = i + 1;
+        if (pat[j] === '!' || pat[j] === '^') j++;
+        if (pat[j] === ']') j++;
+        while (j < pat.length && pat[j] !== ']') j++;
+        if (j >= pat.length){
+          out += '\\['; i += 1;
+        } else {
+          let stuff = pat.slice(i + 1, j);
+          if (stuff.startsWith('!')) stuff = '^' + stuff.slice(1);
+          out += '[' + stuff + ']';
+          i = j + 1;
+        }
+      }
+      else if (c === '\\' && i + 1 < pat.length){
+        out += escapeRe(pat[i + 1]); i += 2;
+      }
+      else { out += escapeRe(c); i += 1; }
+    }
+    return out;
+  }
+
+  match(relpath, isDir){
+    if (this.dirOnly && !isDir) return false;
+    if (this.rootOnly || this.hasSlash){
+      return this.regex.test(relpath);
+    }
+    const base = relpath.split('/').pop();
+    return this.regex.test(base);
+  }
+}
+
+function isIgnored(relpath, isDir, rules){
+  let ignored = false;
+  for (const r of rules){
+    if (r.match(relpath, isDir)) ignored = !r.negate;
+  }
+  return ignored;
+}
+
+async function loadIgnoreRules(url){
+  try{
+    const res = await fetch(url, {cache: 'no-cache'});
+    if (!res.ok) return [];
+    const text = await res.text();
+    const rules = [];
+    for (let line of text.split(/\r?\n/)){
+      // 去行尾空白（保留被反斜杠转义的空格）
+      line = line.replace(/(?<!\\)\s+$/, '');
+      if (!line.trim() || line.startsWith('#')) continue;
+      rules.push(new IgnoreRule(line));
+    }
+    return rules;
+  } catch(_){
+    return [];
+  }
+}
+
+/* 对树应用规则 */
+function filterTree(nodes, parentPath, rules){
+  const out = [];
+  for (const node of nodes){
+    if (MUST_EXCLUDE.has(node.name)) continue;
+
+    const p = parentPath ? parentPath + '/' + node.name : node.name;
+    const isDir = !!node.children;
+
+    if (isIgnored(p, isDir, rules)) continue;
+
+    if (isDir){
+      out.push({
+        name: node.name,
+        children: filterTree(node.children, p, rules),
+      });
+    } else {
+      out.push({name: node.name});
+    }
+  }
+  return out;
+}
+
+/* ============================================================
    数据源 1：GitHub API
    ============================================================ */
 function detectRepo(){
   const o = CONFIG.owner.trim(), r = CONFIG.repo.trim();
-  if(o && r) return {owner:o, repo:r};
+  if (o && r) return {owner: o, repo: r};
   const host = location.hostname;
-  if(!host.endsWith('.github.io')) return null;
+  if (!host.endsWith('.github.io')) return null;
   const owner = host.slice(0, -'.github.io'.length);
   const segs = location.pathname.split('/').filter(Boolean);
   const repo = (segs.length && !segs[0].includes('.')) ? segs[0] : `${owner}.github.io`;
@@ -168,15 +287,15 @@ function detectRepo(){
 
 async function loadFromAPI(){
   const info = detectRepo();
-  if(!info) throw new Error('未识别到仓库，请在 CONFIG 里填 owner/repo');
+  if (!info) throw new Error('未识别到仓库，请在 CONFIG 里填 owner/repo');
   const {owner, repo} = info;
 
   const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-    headers:{'Accept':'application/vnd.github+json'}
+    headers: {'Accept': 'application/vnd.github+json'}
   });
-  if(!repoRes.ok){
-    if(repoRes.status === 403) throw new Error('API 速率超限，请稍后或改用 index.json');
-    if(repoRes.status === 404) throw new Error('仓库不存在或为私有');
+  if (!repoRes.ok){
+    if (repoRes.status === 403) throw new Error('API 速率超限，请稍后或改用 index.json');
+    if (repoRes.status === 404) throw new Error('仓库不存在或为私有');
     throw new Error('API ' + repoRes.status);
   }
   const repoInfo = await repoRes.json();
@@ -184,15 +303,15 @@ async function loadFromAPI(){
 
   const treeRes = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
-    {headers:{'Accept':'application/vnd.github+json'}}
+    {headers: {'Accept': 'application/vnd.github+json'}}
   );
-  if(!treeRes.ok) throw new Error('获取文件树失败 ' + treeRes.status);
+  if (!treeRes.ok) throw new Error('获取文件树失败 ' + treeRes.status);
   const treeData = await treeRes.json();
 
   const paths = (treeData.tree || [])
     .filter(x => x.type === 'blob')
     .map(x => x.path);
-  if(!paths.length) throw new Error('仓库中没有文件');
+  if (!paths.length) throw new Error('仓库中没有文件');
 
   return {
     nodes: treeFromPaths(paths),
@@ -200,112 +319,107 @@ async function loadFromAPI(){
   };
 }
 
-/* 扁平路径数组 → 嵌套树 */
 function treeFromPaths(paths){
   const root = {children: [], _map: new Map()};
-  for(const p of paths){
+  for (const p of paths){
     const parts = p.split('/');
     let cur = root;
-    for(let i = 0; i < parts.length; i++){
+    for (let i = 0; i < parts.length; i++){
       const isFile = i === parts.length - 1;
       const part = parts[i];
       let node = cur._map.get(part);
-      if(!node){
+      if (!node){
         node = {name: part};
-        if(!isFile) node.children = [];
+        if (!isFile) node.children = [];
         cur._map.set(part, node);
         cur.children.push(node);
-      } else if(!isFile && !node.children){
+      } else if (!isFile && !node.children){
         node.children = [];
       }
-      if(!isFile){
-        if(!node._map) node._map = new Map();
+      if (!isFile){
+        if (!node._map) node._map = new Map();
         cur = node;
       }
     }
   }
-  const strip = n => { delete n._map; if(n.children) n.children.forEach(strip); };
+  const strip = n => { delete n._map; if (n.children) n.children.forEach(strip); };
   strip(root);
   return root.children;
 }
 
 /* ============================================================
    数据源 2：index.json
-   支持三种格式，自动识别：
-   ① {"children":[{"name":"App","children":[...]}]}
-   ② {"files":["App/a.exe","lnk/b.lnk"]}
-   ③ ["App/a.exe","lnk/b.lnk"]
    ============================================================ */
 function normNode(n){
-  if(typeof n === 'string') return {name: n};
+  if (typeof n === 'string') return {name: n};
   const name = n.name ?? n.path ?? '';
-  if(Array.isArray(n.children)) return {name, children: n.children.map(normNode)};
+  if (Array.isArray(n.children)) return {name, children: n.children.map(normNode)};
   return {name};
 }
 function normalizeJson(data){
-  if(Array.isArray(data)){
-    if(data.every(x => typeof x === 'string')) return treeFromPaths(data);
+  if (Array.isArray(data)){
+    if (data.every(x => typeof x === 'string')) return treeFromPaths(data);
     return data.map(normNode);
   }
-  if(data && Array.isArray(data.children)) return data.children.map(normNode);
-  if(data && Array.isArray(data.files))    return treeFromPaths(data.files);
+  if (data && Array.isArray(data.children)) return data.children.map(normNode);
+  if (data && Array.isArray(data.files))    return treeFromPaths(data.files);
   throw new Error('index.json 格式无法识别');
 }
 async function loadFromJson(){
-  const res = await fetch('index.json', {cache:'no-cache'});
-  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const res = await fetch('index.json', {cache: 'no-cache'});
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   return {nodes: normalizeJson(await res.json()), label: 'index.json'};
 }
 
 /* ============================================================
-   数据源 3：folder_structure.txt（tree /f 输出）
+   数据源 3：folder_structure.txt
    ============================================================ */
 function parseTree(txt){
   const root = [];
   const stack = [{depth: -1, children: root}];
   let started = false;
 
-  for(const raw of txt.split(/\r?\n/)){
+  for (const raw of txt.split(/\r?\n/)){
     const line = raw.replace(/\s+$/, '');
-    if(!started){
-      if(line.trim() === 'E:.') started = true;
+    if (!started){
+      if (line.trim() === 'E:.') started = true;
       continue;
     }
-    if(!line.trim()) continue;
+    if (!line.trim()) continue;
 
     const md = line.match(/^((?:\|   |    )*)([+\\])---(.*)$/);
-    if(md){
+    if (md){
       const depth = md[1].length / 4;
       const name  = md[3].trim();
-      while(stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+      while (stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
       const node = {name, children: []};
       stack[stack.length - 1].children.push(node);
       stack.push({depth, children: node.children});
       continue;
     }
     const mf = line.match(/^((?:\|   |    )*)(.+)$/);
-    if(!mf) continue;
+    if (!mf) continue;
     const depth = mf[1].length / 4 - 1;
     const name  = mf[2].trim();
-    if(!name) continue;
-    while(stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+    if (!name) continue;
+    while (stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
     stack[stack.length - 1].children.push({name});
   }
   return root;
 }
 async function loadFromTxt(){
-  const res = await fetch('folder_structure.txt', {cache:'no-cache'});
-  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const res = await fetch('folder_structure.txt', {cache: 'no-cache'});
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   const buf = await res.arrayBuffer();
   let text = new TextDecoder('utf-8').decode(buf);
-  if(text.includes('\uFFFD')){
-    try{ text = new TextDecoder('gbk').decode(buf); }catch(_){}
+  if (text.includes('\uFFFD')){
+    try { text = new TextDecoder('gbk').decode(buf); } catch(_){}
   }
   return {nodes: parseTree(text), label: 'folder_structure.txt'};
 }
 
 /* ============================================================
-   统一加载
+   统一加载（含 .indexignore 过滤）
    ============================================================ */
 const LOADERS = {
   'api': loadFromAPI,
@@ -315,14 +429,36 @@ const LOADERS = {
 
 async function loadAll(){
   const errors = [];
-  for(const src of CONFIG.sources){
+
+  // 先加载一次 ignore 规则（只加载一次）
+  let rules = [];
+  if (CONFIG.applyIgnoreFile){
+    rules = await loadIgnoreRules(CONFIG.ignoreFile || '.indexignore');
+  }
+
+  for (const src of CONFIG.sources){
     const fn = LOADERS[src];
-    if(!fn) continue;
+    if (!fn) continue;
     try{
       const result = await fn();
-      if(result && result.nodes && result.nodes.length) return result;
-      errors.push(`${src}: 空结果`);
-    }catch(e){
+      if (!result || !result.nodes || !result.nodes.length){
+        errors.push(`${src}: 空结果`);
+        continue;
+      }
+
+      let nodes = result.nodes;
+      let label = result.label;
+      if (rules.length){
+        nodes = filterTree(nodes, '', rules);
+        label += ` · ${CONFIG.ignoreFile}(${rules.length})`;
+        if (!nodes.length){
+          errors.push(`${src}: 应用排除规则后为空`);
+          continue;
+        }
+      }
+
+      return {nodes, label};
+    } catch(e){
       errors.push(`${src}: ${e.message}`);
       console.warn('[索引] 数据源失败：' + src, e);
     }
@@ -336,22 +472,22 @@ async function loadAll(){
 function sortTree(nodes){
   nodes.sort((a, b) => {
     const ad = !!a.children, bd = !!b.children;
-    if(ad !== bd) return ad ? -1 : 1;
+    if (ad !== bd) return ad ? -1 : 1;
     return a.name.localeCompare(b.name, 'zh-CN', {numeric: true});
   });
-  for(const n of nodes) if(n.children) sortTree(n.children);
+  for (const n of nodes) if (n.children) sortTree(n.children);
 }
 function countFiles(node){
-  if(!node.children) return 1;
+  if (!node.children) return 1;
   let n = 0;
-  for(const c of node.children) n += countFiles(c);
+  for (const c of node.children) n += countFiles(c);
   return n;
 }
 function fileUrl(path){
   return path.split('/').map(encodeURIComponent).join('/');
 }
 function renderNode(node, parentPath, depth){
-  if(!node.children){
+  if (!node.children){
     const p = parentPath ? parentPath + '/' + node.name : node.name;
     return `<a class="file" href="${fileUrl(p)}" target="_blank" rel="noopener"` +
            ` data-path="${esc(p.toLowerCase())}" title="${esc(p)}">` +
@@ -368,7 +504,7 @@ function renderNode(node, parentPath, depth){
 }
 
 /* ============================================================
-   搜索过滤
+   搜索
    ============================================================ */
 let dirCache = null;
 
@@ -378,9 +514,9 @@ function doFilter(q){
   const empty  = document.getElementById('empty');
   const files  = treeEl.querySelectorAll('a.file');
 
-  if(!dirCache) dirCache = Array.from(treeEl.querySelectorAll('details.dir'));
+  if (!dirCache) dirCache = Array.from(treeEl.querySelectorAll('details.dir'));
 
-  if(!q){
+  if (!q){
     files.forEach(f => f.classList.remove('hide'));
     dirCache.forEach(d => {
       d.classList.remove('hide');
@@ -394,20 +530,19 @@ function doFilter(q){
   files.forEach(f => {
     const hit = f.dataset.path.includes(q);
     f.classList.toggle('hide', !hit);
-    if(hit) visible++;
+    if (hit) visible++;
   });
 
-  // 自底向上：子孙里有可见文件，目录就显示
   const sorted = dirCache.slice().sort(
     (a, b) => Number(b.dataset.depth) - Number(a.dataset.depth)
   );
-  for(const d of sorted){
+  for (const d of sorted){
     let has = false;
-    for(const f of d.querySelectorAll('a.file')){
-      if(!f.classList.contains('hide')){ has = true; break; }
+    for (const f of d.querySelectorAll('a.file')){
+      if (!f.classList.contains('hide')){ has = true; break; }
     }
     d.classList.toggle('hide', !has);
-    if(has) d.open = true;
+    if (has) d.open = true;
   }
 
   empty.hidden = visible > 0;
@@ -422,22 +557,21 @@ function doFilter(q){
   const srcEl    = document.getElementById('src');
 
   try{
-    const result = await loadAll();
-    const nodes = result.nodes;
+    const {nodes, label} = await loadAll();
     sortTree(nodes);
 
     treeEl.innerHTML = nodes.map(n => renderNode(n, '', 0)).join('');
     dirCache = null;
 
     let total = 0;
-    for(const n of nodes) total += countFiles(n);
+    for (const n of nodes) total += countFiles(n);
 
-    srcEl.textContent = `${result.label} · ${total} 个文件`;
+    srcEl.textContent = `${label} · ${total} 个文件`;
     srcEl.classList.add('ok');
 
     statusEl.hidden = true;
     treeEl.hidden = false;
-  }catch(err){
+  } catch(err){
     srcEl.textContent = '加载失败';
     statusEl.innerHTML =
       `<p>❌ 没有可用的数据源</p>` +
@@ -449,9 +583,7 @@ function doFilter(q){
   }
 })();
 
-/* ============================================================
-   交互
-   ============================================================ */
+/* ---------------- 交互 ---------------- */
 const q = document.getElementById('q');
 let timer = null;
 q.addEventListener('input', () => {
@@ -459,10 +591,10 @@ q.addEventListener('input', () => {
   timer = setTimeout(() => doFilter(q.value), 110);
 });
 document.addEventListener('keydown', e => {
-  if(e.key === '/' && document.activeElement !== q){
+  if (e.key === '/' && document.activeElement !== q){
     e.preventDefault(); q.focus(); q.select();
   }
-  if(e.key === 'Escape' && document.activeElement === q){
+  if (e.key === 'Escape' && document.activeElement === q){
     q.value = ''; doFilter(''); q.blur();
   }
 });
