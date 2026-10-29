@@ -20,7 +20,7 @@ header{
   background:rgba(13,17,23,.82);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--border);padding:14px 20px;
 }
-.hd{max-width:1120px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.hd{max-width:1120px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .logo{font-size:16px;font-weight:700;white-space:nowrap;letter-spacing:.3px}
 .logo b{color:var(--accent)}
 .searchwrap{flex:1;position:relative;min-width:180px}
@@ -34,6 +34,13 @@ header{
   font-size:14px;font-family:inherit;outline:none;transition:.18s;
 }
 #q:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.16);background:#0d1117}
+.actions{display:flex;gap:6px}
+.btn{
+  background:var(--panel);border:1px solid var(--border);color:var(--dim);
+  border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;line-height:1;
+  font-family:inherit;transition:.15s;white-space:nowrap;
+}
+.btn:hover{background:var(--panel2);color:var(--fg);border-color:var(--accent)}
 .src{
   font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:20px;
   padding:2px 10px;white-space:nowrap;max-width:42vw;overflow:hidden;text-overflow:ellipsis;
@@ -104,6 +111,10 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
     <div class="searchwrap">
       <input id="q" type="search" placeholder="搜索文件…  ( 按 / 聚焦 )" autocomplete="off" spellcheck="false">
     </div>
+    <div class="actions">
+      <button class="btn" id="expandAll" title="全部展开">⊞ 展开</button>
+      <button class="btn" id="collapseAll" title="全部收起">⊟ 收起</button>
+    </div>
     <div class="src" id="src">加载中…</div>
   </div>
 </header>
@@ -114,24 +125,26 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
   <div id="empty" hidden>没有找到匹配的文件 🤷</div>
 </main>
 
-<footer>按 <kbd>/</kbd> 聚焦搜索 · <kbd>Esc</kbd> 清空</footer>
+<footer>按 <kbd>/</kbd> 聚焦搜索 · <kbd>Esc</kbd> 清空 · 展开状态自动记忆</footer>
 
 <script>
 /* ============================================================
    配置区
    ============================================================ */
 const CONFIG = {
-  owner:  '',               // 如 'yourname'，留空自动从 xxx.github.io 推断
-  repo:   '',               // 如 'my-files'
-  branch: '',               // 留空取默认分支
+  owner:  '',
+  repo:   '',
+  branch: '',
   sources: ['index.json', 'api', 'folder_structure.txt'],
-
-  ignoreFile: '.indexignore',   // 排除规则文件（相对页面）
-  applyIgnoreFile: true,        // 是否在前端再应用一次排除规则
+  ignoreFile: '.indexignore',
+  applyIgnoreFile: true,
 };
 
-/* 无论如何都不进索引的文件（与 gen_index.py 保持一致） */
+/* 无论如何都不进索引的文件（与 gen_index.py 一致） */
 const MUST_EXCLUDE = new Set(['index.json', 'gen_index.py', '.indexignore']);
+
+/* 展开状态的存储键 */
+const STORAGE_KEY = 'file-index:tree-state';
 
 /* ---------------- 基础工具 ---------------- */
 function esc(s){
@@ -158,7 +171,7 @@ function iconFor(name){
 }
 
 /* ============================================================
-   .indexignore 解析（与 gen_index.py 行为对齐）
+   .indexignore 解析
    ============================================================ */
 const RE_ESCAPE = /[\\^$.*+?()[\]{}|]/g;
 const escapeRe = s => s.replace(RE_ESCAPE, '\\$&');
@@ -168,17 +181,13 @@ class IgnoreRule {
     let p = line;
     this.negate = p.startsWith('!');
     if (this.negate) p = p.slice(1);
-
     this.dirOnly = p.endsWith('/');
     if (this.dirOnly) p = p.slice(0, -1);
-
     this.rootOnly = p.startsWith('/');
     if (this.rootOnly) p = p.slice(1);
-
     this.hasSlash = p.includes('/');
     this.regex = new RegExp('^' + this._compile(p) + '$');
   }
-
   _compile(pat){
     let out = '', i = 0;
     while (i < pat.length){
@@ -195,9 +204,8 @@ class IgnoreRule {
         if (pat[j] === '!' || pat[j] === '^') j++;
         if (pat[j] === ']') j++;
         while (j < pat.length && pat[j] !== ']') j++;
-        if (j >= pat.length){
-          out += '\\['; i += 1;
-        } else {
+        if (j >= pat.length){ out += '\\['; i += 1; }
+        else {
           let stuff = pat.slice(i + 1, j);
           if (stuff.startsWith('!')) stuff = '^' + stuff.slice(1);
           out += '[' + stuff + ']';
@@ -211,17 +219,12 @@ class IgnoreRule {
     }
     return out;
   }
-
   match(relpath, isDir){
     if (this.dirOnly && !isDir) return false;
-    if (this.rootOnly || this.hasSlash){
-      return this.regex.test(relpath);
-    }
-    const base = relpath.split('/').pop();
-    return this.regex.test(base);
+    if (this.rootOnly || this.hasSlash) return this.regex.test(relpath);
+    return this.regex.test(relpath.split('/').pop());
   }
 }
-
 function isIgnored(relpath, isDir, rules){
   let ignored = false;
   for (const r of rules){
@@ -229,7 +232,6 @@ function isIgnored(relpath, isDir, rules){
   }
   return ignored;
 }
-
 async function loadIgnoreRules(url){
   try{
     const res = await fetch(url, {cache: 'no-cache'});
@@ -237,42 +239,28 @@ async function loadIgnoreRules(url){
     const text = await res.text();
     const rules = [];
     for (let line of text.split(/\r?\n/)){
-      // 去行尾空白（保留被反斜杠转义的空格）
       line = line.replace(/(?<!\\)\s+$/, '');
       if (!line.trim() || line.startsWith('#')) continue;
       rules.push(new IgnoreRule(line));
     }
     return rules;
-  } catch(_){
-    return [];
-  }
+  } catch(_){ return []; }
 }
-
-/* 对树应用规则 */
 function filterTree(nodes, parentPath, rules){
   const out = [];
   for (const node of nodes){
     if (MUST_EXCLUDE.has(node.name)) continue;
-
     const p = parentPath ? parentPath + '/' + node.name : node.name;
     const isDir = !!node.children;
-
     if (isIgnored(p, isDir, rules)) continue;
-
-    if (isDir){
-      out.push({
-        name: node.name,
-        children: filterTree(node.children, p, rules),
-      });
-    } else {
-      out.push({name: node.name});
-    }
+    if (isDir) out.push({name: node.name, children: filterTree(node.children, p, rules)});
+    else       out.push({name: node.name});
   }
   return out;
 }
 
 /* ============================================================
-   数据源 1：GitHub API
+   数据源
    ============================================================ */
 function detectRepo(){
   const o = CONFIG.owner.trim(), r = CONFIG.repo.trim();
@@ -284,12 +272,10 @@ function detectRepo(){
   const repo = (segs.length && !segs[0].includes('.')) ? segs[0] : `${owner}.github.io`;
   return {owner, repo};
 }
-
 async function loadFromAPI(){
   const info = detectRepo();
   if (!info) throw new Error('未识别到仓库，请在 CONFIG 里填 owner/repo');
   const {owner, repo} = info;
-
   const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
     headers: {'Accept': 'application/vnd.github+json'}
   });
@@ -300,25 +286,19 @@ async function loadFromAPI(){
   }
   const repoInfo = await repoRes.json();
   const branch = CONFIG.branch || repoInfo.default_branch || 'main';
-
   const treeRes = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
     {headers: {'Accept': 'application/vnd.github+json'}}
   );
   if (!treeRes.ok) throw new Error('获取文件树失败 ' + treeRes.status);
   const treeData = await treeRes.json();
-
-  const paths = (treeData.tree || [])
-    .filter(x => x.type === 'blob')
-    .map(x => x.path);
+  const paths = (treeData.tree || []).filter(x => x.type === 'blob').map(x => x.path);
   if (!paths.length) throw new Error('仓库中没有文件');
-
   return {
     nodes: treeFromPaths(paths),
     label: `GitHub API · ${owner}/${repo}@${branch}` + (treeData.truncated ? '（已截断）' : '')
   };
 }
-
 function treeFromPaths(paths){
   const root = {children: [], _map: new Map()};
   for (const p of paths){
@@ -346,10 +326,6 @@ function treeFromPaths(paths){
   strip(root);
   return root.children;
 }
-
-/* ============================================================
-   数据源 2：index.json
-   ============================================================ */
 function normNode(n){
   if (typeof n === 'string') return {name: n};
   const name = n.name ?? n.path ?? '';
@@ -370,23 +346,14 @@ async function loadFromJson(){
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return {nodes: normalizeJson(await res.json()), label: 'index.json'};
 }
-
-/* ============================================================
-   数据源 3：folder_structure.txt
-   ============================================================ */
 function parseTree(txt){
   const root = [];
   const stack = [{depth: -1, children: root}];
   let started = false;
-
   for (const raw of txt.split(/\r?\n/)){
     const line = raw.replace(/\s+$/, '');
-    if (!started){
-      if (line.trim() === 'E:.') started = true;
-      continue;
-    }
+    if (!started){ if (line.trim() === 'E:.') started = true; continue; }
     if (!line.trim()) continue;
-
     const md = line.match(/^((?:\|   |    )*)([+\\])---(.*)$/);
     if (md){
       const depth = md[1].length / 4;
@@ -418,45 +385,32 @@ async function loadFromTxt(){
   return {nodes: parseTree(text), label: 'folder_structure.txt'};
 }
 
-/* ============================================================
-   统一加载（含 .indexignore 过滤）
-   ============================================================ */
 const LOADERS = {
   'api': loadFromAPI,
   'index.json': loadFromJson,
   'folder_structure.txt': loadFromTxt
 };
-
 async function loadAll(){
   const errors = [];
-
-  // 先加载一次 ignore 规则（只加载一次）
   let rules = [];
   if (CONFIG.applyIgnoreFile){
     rules = await loadIgnoreRules(CONFIG.ignoreFile || '.indexignore');
   }
-
   for (const src of CONFIG.sources){
     const fn = LOADERS[src];
     if (!fn) continue;
     try{
       const result = await fn();
       if (!result || !result.nodes || !result.nodes.length){
-        errors.push(`${src}: 空结果`);
-        continue;
+        errors.push(`${src}: 空结果`); continue;
       }
-
       let nodes = result.nodes;
       let label = result.label;
       if (rules.length){
         nodes = filterTree(nodes, '', rules);
         label += ` · ${CONFIG.ignoreFile}(${rules.length})`;
-        if (!nodes.length){
-          errors.push(`${src}: 应用排除规则后为空`);
-          continue;
-        }
+        if (!nodes.length){ errors.push(`${src}: 应用排除规则后为空`); continue; }
       }
-
       return {nodes, label};
     } catch(e){
       errors.push(`${src}: ${e.message}`);
@@ -495,7 +449,8 @@ function renderNode(node, parentPath, depth){
            `<span class="nm">${esc(node.name)}</span></a>`;
   }
   const p = parentPath ? parentPath + '/' + node.name : node.name;
-  return `<details class="dir" data-depth="${depth}"${depth === 0 ? ' open' : ''}>` +
+  /* 关键：不给 open 属性，默认全部收拢 */
+  return `<details class="dir" data-depth="${depth}" data-path="${esc(p)}">` +
     `<summary><span>${depth === 0 ? '📂' : '📁'}</span>` +
     `<span class="nm">${esc(node.name)}</span>` +
     `<span class="cnt">${countFiles(node)}</span></summary>` +
@@ -504,27 +459,80 @@ function renderNode(node, parentPath, depth){
 }
 
 /* ============================================================
+   展开状态记忆
+   ============================================================ */
+const treeEl = document.getElementById('tree');
+let dirCache = null;
+let filtering = false;      // 搜索中：不记忆展开状态
+let saveTimer = null;
+
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function writeState(state){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(_){}
+}
+function scheduleSaveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (filtering) return;
+    const state = loadState();
+    treeEl.querySelectorAll('details.dir').forEach(d => {
+      state[d.dataset.path] = d.open;
+    });
+    writeState(state);
+  }, 150);
+}
+function applySavedState(){
+  const state = loadState();
+  treeEl.querySelectorAll('details.dir').forEach(d => {
+    const p = d.dataset.path;
+    d.open = (p in state) ? !!state[p] : false;   // 无记录 → 收拢
+  });
+}
+function setAllOpen(open){
+  const state = loadState();
+  treeEl.querySelectorAll('details.dir').forEach(d => {
+    if (filtering && d.classList.contains('hide')) return;
+    d.open = open;
+    if (!filtering) state[d.dataset.path] = open;
+  });
+  if (!filtering) writeState(state);
+}
+
+/* toggle 不冒泡，用 capture 在容器上监听 */
+treeEl.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement)) return;
+  if (!d.classList.contains('dir')) return;
+  if (filtering) return;
+  scheduleSaveState();
+}, true);
+
+document.getElementById('expandAll').addEventListener('click',   () => setAllOpen(true));
+document.getElementById('collapseAll').addEventListener('click', () => setAllOpen(false));
+
+/* ============================================================
    搜索
    ============================================================ */
-let dirCache = null;
-
 function doFilter(q){
   q = q.trim().toLowerCase();
-  const treeEl = document.getElementById('tree');
-  const empty  = document.getElementById('empty');
-  const files  = treeEl.querySelectorAll('a.file');
+  const empty = document.getElementById('empty');
+  const files = treeEl.querySelectorAll('a.file');
 
   if (!dirCache) dirCache = Array.from(treeEl.querySelectorAll('details.dir'));
 
   if (!q){
+    filtering = false;
     files.forEach(f => f.classList.remove('hide'));
-    dirCache.forEach(d => {
-      d.classList.remove('hide');
-      d.open = d.dataset.depth === '0';
-    });
+    dirCache.forEach(d => d.classList.remove('hide'));
+    applySavedState();     // 恢复用户记住的状态
     empty.hidden = true;
     return;
   }
+
+  filtering = true;
 
   let visible = 0;
   files.forEach(f => {
@@ -542,7 +550,7 @@ function doFilter(q){
       if (!f.classList.contains('hide')){ has = true; break; }
     }
     d.classList.toggle('hide', !has);
-    if (has) d.open = true;
+    if (has) d.open = true;    // 搜索时自动展开匹配路径
   }
 
   empty.hidden = visible > 0;
@@ -553,7 +561,6 @@ function doFilter(q){
    ============================================================ */
 (async function init(){
   const statusEl = document.getElementById('status');
-  const treeEl   = document.getElementById('tree');
   const srcEl    = document.getElementById('src');
 
   try{
@@ -563,9 +570,11 @@ function doFilter(q){
     treeEl.innerHTML = nodes.map(n => renderNode(n, '', 0)).join('');
     dirCache = null;
 
+    /* 恢复记忆（在显示之前，避免闪动） */
+    applySavedState();
+
     let total = 0;
     for (const n of nodes) total += countFiles(n);
-
     srcEl.textContent = `${label} · ${total} 个文件`;
     srcEl.classList.add('ok');
 
@@ -583,19 +592,19 @@ function doFilter(q){
   }
 })();
 
-/* ---------------- 交互 ---------------- */
-const q = document.getElementById('q');
+/* ---------------- 搜索交互 ---------------- */
+const qInput = document.getElementById('q');
 let timer = null;
-q.addEventListener('input', () => {
+qInput.addEventListener('input', () => {
   clearTimeout(timer);
-  timer = setTimeout(() => doFilter(q.value), 110);
+  timer = setTimeout(() => doFilter(qInput.value), 110);
 });
 document.addEventListener('keydown', e => {
-  if (e.key === '/' && document.activeElement !== q){
-    e.preventDefault(); q.focus(); q.select();
+  if (e.key === '/' && document.activeElement !== qInput){
+    e.preventDefault(); qInput.focus(); qInput.select();
   }
-  if (e.key === 'Escape' && document.activeElement === q){
-    q.value = ''; doFilter(''); q.blur();
+  if (e.key === 'Escape' && document.activeElement === qInput){
+    qInput.value = ''; doFilter(''); qInput.blur();
   }
 });
 </script>
