@@ -45,3 +45,14 @@ desktop.ini
 # ===== 示例：想完全排除两个大目录 =====
 # music/
 # video/
+
+# ===== 这里 =====
+/App/*
+/music-old/*
+/picture-old/*
+/video/*
+/old-code
+awa
+/index.html
+/index.json
+/README.md
