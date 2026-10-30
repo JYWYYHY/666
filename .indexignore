@@ -47,11 +47,11 @@ desktop.ini
 # video/
 
 # ===== 这里 =====
-/App/*
-/music-old/*
-/picture-old/*
-/video/*
-/old-code
+/App/
+/music-old/
+/picture-old/
+/video/
+/old-code/
 awa
 /index.html
 /index.json

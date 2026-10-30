@@ -1,8 +1,8 @@
-/App/*
-/music-old/*
-/picture-old/*
-/video/*
-/old-code
+/App/
+/music-old/
+/picture-old/
+/video/
+/old-code/
 awa
 Thumbs.db
 desktop.ini
