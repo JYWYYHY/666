@@ -56,3 +56,5 @@ awa
 /index.html
 /index.json
 /README.md
+/.gitattributes
+/.gitignore
