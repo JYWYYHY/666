@@ -1,0 +1,14 @@
+# 1. 兼容旧用法：读报告，MP3 转 VBR5
+python audio_convert.py non_128kbps_songs.txt
+
+# 2. 直接处理目录，只转码率 >=128k 的文件（替代原来"生成报告再处理"两步）
+python audio_convert.py "E:\666\music" --min-bitrate 128
+
+# 3. 转 Opus 128k（从无损源或高码率源转才有意义）
+python audio_convert.py "E:\666\music" -f opus -b 128k
+
+# 4. 转 FLAC 存档（从 WAV/APE 等无损源转才有意义）
+python audio_convert.py "E:\666\music" -f flac
+
+# 5. 预览会做什么，不动文件
+python audio_convert.py "E:\666\music" --min-bitrate 128 --dry-run

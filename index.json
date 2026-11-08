@@ -339,6 +339,12 @@
      "name": "脚本",
      "children": [
       {
+       "name": "audio_convert(用法).txt"
+      },
+      {
+       "name": "audio_convert.py"
+      },
+      {
        "name": "check_mp3_kbps(安装依赖).sh"
       },
       {
@@ -346,6 +352,15 @@
       },
       {
        "name": "convert_gif_to_webp.py"
+      },
+      {
+       "name": "convert_mp3_to_128kbps(安装依赖).txt"
+      },
+      {
+       "name": "convert_mp3_to_128kbps(用法).txt"
+      },
+      {
+       "name": "convert_mp3_to_128kbps.py"
       },
       {
        "name": "convert_to_webp(复制gif).py"
@@ -369,13 +384,22 @@
        "name": "IDM联网激活脚本(PowerShell).txt"
       },
       {
-       "name": "localhost8000.bat"
+       "name": "img_to_jpg.py"
+      },
+      {
+       "name": "img_to_jpg.txt"
       },
       {
        "name": "MAS_AIO(Windows激活).cmd"
       },
       {
        "name": "python generate_tree.py"
+      },
+      {
+       "name": "python启动代理(localhost8000).bat"
+      },
+      {
+       "name": "strip_cover.py"
       },
       {
        "name": "Synctime.bat"
@@ -426,6 +450,12 @@
        "name": "恢复快捷方式小箭头(透明图标法).bat"
       },
       {
+       "name": "批量改后缀.bat"
+      },
+      {
+       "name": "提取MP3封面与歌词到独立文件夹.py"
+      },
+      {
        "name": "提取当前文件夹所有文件名.bat"
       },
       {
@@ -467,6 +497,9 @@
      "name": "favorites_2026_9_24.html"
     },
     {
+     "name": "HoYo-Glyphs-20250529.zip"
+    },
+    {
      "name": "JSON文件筛选工具.html"
     },
     {
@@ -474,6 +507,9 @@
     },
     {
      "name": "Saira_Regular.ttf"
+    },
+    {
+     "name": "SDK_SC_Web 85W, 汉仪文黑-85W Heavy.ttf"
     },
     {
      "name": "Source Han Sans & Saira Hybrid-Regular.ttf"
@@ -529,6 +565,9 @@
        "name": "A rainy dancer 2021 - r-906、初音ミク.jpg"
       },
       {
+       "name": "AboutTheUniverse - SOTUIMIssionary.jpg"
+      },
+      {
        "name": "AbsoluTe disoRdeR - Aiss & rN & takehirotei & Riya.jpg"
       },
       {
@@ -542,6 +581,9 @@
       },
       {
        "name": "Altale - 削除.jpg"
+      },
+      {
+       "name": "Ametrine.jpg"
       },
       {
        "name": "Another Me - D_AAN.jpg"
@@ -625,6 +667,9 @@
        "name": "DESTRUCTION 3,2,1 - Normal1zer vs. BrokenNerdz.jpg"
       },
       {
+       "name": "Desultory Signals.jpg"
+      },
+      {
        "name": "Diamond Eyes - SYNTHETIC.jpg"
       },
       {
@@ -641,6 +686,15 @@
       },
       {
        "name": "enchanted love - linear ring.jpg"
+      },
+      {
+       "name": "Entrance to the Chaos - 打打だいず vs. siromaru.jpg"
+      },
+      {
+       "name": "Evanescent - LeaF.jpg"
+      },
+      {
+       "name": "Exoplanetary Mirage - Camellia.jpg"
       },
       {
        "name": "Frozen Heart - A-39、沙包P.jpg"
@@ -668,6 +722,9 @@
       },
       {
        "name": "iL-Artifact - Link0.jpg"
+      },
+      {
+       "name": "Implexrough - Silentroommommy.jpg"
       },
       {
        "name": "IN - Zris.jpg"
@@ -730,6 +787,9 @@
        "name": "MEGALOVANIA - Toby Fox.jpg"
       },
       {
+       "name": "Message.jpg"
+      },
+      {
        "name": "Miracle Forest (VIP Mix) - Rinth_live.jpg"
       },
       {
@@ -761,6 +821,9 @@
       },
       {
        "name": "Pentiment - Nothing But Requiem、Museo.jpg"
+      },
+      {
+       "name": "Petrichor.jpg"
       },
       {
        "name": "Plastic Heart - Abel & Palami.jpg"
@@ -853,6 +916,9 @@
        "name": "Towards the Light - Jacoo.jpg"
       },
       {
+       "name": "True Home, True World (Rework).jpg"
+      },
+      {
        "name": "Umikaze Moment - わかどり&saaa.jpg"
       },
       {
@@ -869,6 +935,9 @@
       },
       {
        "name": "Wellerman - Nathan Evans.jpg"
+      },
+      {
+       "name": "What do you want more than a Happy ending？.jpg"
       },
       {
        "name": "White Magic - Snail's House.jpg"
@@ -929,6 +998,9 @@
       },
       {
        "name": "ストレイソウル・アラウンド - みーに.jpg"
+      },
+      {
+       "name": "ハテ.jpg"
       },
       {
        "name": "ブレインロット - 東京真中、重音テト.jpg"
@@ -1607,6 +1679,9 @@
      "name": "A rainy dancer 2021 - r-906、初音ミク.mp3"
     },
     {
+     "name": "About The Universe - SOTUI & Missionary.mp3"
+    },
+    {
      "name": "AboutUs0.mp3"
     },
     {
@@ -1623,6 +1698,9 @@
     },
     {
      "name": "Altale - 削除.mp3"
+    },
+    {
+     "name": "Ametrine - GRYSCL & MIssionary.mp3"
     },
     {
      "name": "Another Me - D_AAN.mp3"
@@ -1706,6 +1784,9 @@
      "name": "DESTRUCTION 3,2,1 - Normal1zer vs. BrokenNerdz.mp3"
     },
     {
+     "name": "Desultory Signals - technoplanet.mp3"
+    },
+    {
      "name": "Diamond Eyes - SYNTHETIC.mp3"
     },
     {
@@ -1725,6 +1806,15 @@
     },
     {
      "name": "ending.mp3"
+    },
+    {
+     "name": "Entrance to the Chaos - 打打だいず vs. siromaru.mp3"
+    },
+    {
+     "name": "Evanescent - LeaF.mp3"
+    },
+    {
+     "name": "Exoplanetary Mirage - Camellia.mp3"
     },
     {
      "name": "Frozen Heart - A-39、沙包P.mp3"
@@ -1752,6 +1842,9 @@
     },
     {
      "name": "iL-Artifact - Link0.mp3"
+    },
+    {
+     "name": "Implexrough - Silentroom × mommy.mp3"
     },
     {
      "name": "IN - Zris.mp3"
@@ -1817,6 +1910,9 @@
      "name": "MEGALOVANIA - Toby Fox.mp3"
     },
     {
+     "name": "Message - くるぶっこちゃん.mp3"
+    },
+    {
      "name": "Miracle Forest (VIP Mix) - Rinth_live.mp3"
     },
     {
@@ -1848,6 +1944,9 @@
     },
     {
      "name": "Pentiment - Nothing But Requiem、Museo.mp3"
+    },
+    {
+     "name": "Petrichor - void (Mournfinale).mp3"
     },
     {
      "name": "Plastic Heart - Abel & Palami.mp3"
@@ -1943,6 +2042,9 @@
      "name": "Towards the Light - Jacoo.mp3"
     },
     {
+     "name": "True Home, True World (Rework).mp3"
+    },
+    {
      "name": "Umikaze Moment - わかどり&saaa.mp3"
     },
     {
@@ -1959,6 +2061,9 @@
     },
     {
      "name": "Wellerman - Nathan Evans.mp3"
+    },
+    {
+     "name": "What do you want more than a Happy ending？ - Apo11o”HALO”program ft. 安月名 莉子×大濑良 あい.mp3"
     },
     {
      "name": "White Magic - Snail's House.mp3"
@@ -2019,6 +2124,9 @@
     },
     {
      "name": "ストレイソウル・アラウンド - みーに.mp3"
+    },
+    {
+     "name": "ハテ - rN  Frums.mp3"
     },
     {
      "name": "ブレインロット - 東京真中、重音テト.mp3"
@@ -4170,13 +4278,25 @@
        "name": "70.webp"
       },
       {
+       "name": "About The Universe - SOTUI & Missionary.webp"
+      },
+      {
        "name": "AbsoluTe disoRdeR.webp"
+      },
+      {
+       "name": "Ametrine - GRYSCL & MIssionary.webp"
       },
       {
        "name": "Cover (front).webp"
       },
       {
+       "name": "Desultory Signals - technoplanet.webp"
+      },
+      {
        "name": "Distorted Fate(封面).webp"
+      },
+      {
+       "name": "Entrance to the Chaos - 打打だいず vs. siromaru（封面）.webp"
       },
       {
        "name": "folder (2).webp"
@@ -4194,6 +4314,9 @@
        "name": "Lifeline - Zeraphym.webp"
       },
       {
+       "name": "Message - くるぶっこちゃん.webp"
+      },
+      {
        "name": "Parfait.webp"
       },
       {
@@ -4209,6 +4332,21 @@
        "name": "Wellerman.webp"
       },
       {
+       "name": "What do you want more than a Happy ending - AT.webp"
+      },
+      {
+       "name": "What do you want more than a Happy ending - EZ.webp"
+      },
+      {
+       "name": "What do you want more than a Happy ending - HD.webp"
+      },
+      {
+       "name": "What do you want more than a Happy ending - IN.webp"
+      },
+      {
+       "name": "What do you want more than a Happy ending？.webp"
+      },
+      {
        "name": "Winter↑ Cube↓(封面).webp"
       },
       {
@@ -4219,6 +4357,9 @@
       },
       {
        "name": "もぺもぺ.webp"
+      },
+      {
+       "name": "ハテ - rN  Frums.webp"
       },
       {
        "name": "今天不是明天 (feat. 兰音Reine) - 电音联盟、音波狂潮、V-Festival、PIKASONIC、兰音Reine.webp"
@@ -4454,6 +4595,9 @@
        "name": "奶龙.gif"
       },
       {
+       "name": "奶龙函数.webp"
+      },
+      {
        "name": "小黑子挺拽呀 会坤击波兰吗.webp"
       },
       {
@@ -4597,6 +4741,9 @@
          "name": "PhiEdit.ico"
         },
         {
+         "name": "Phigros_Icon_4.0.0.webp"
+        },
+        {
          "name": "PhiTogether.ico"
         },
         {
@@ -4651,6 +4798,9 @@
       },
       {
        "name": "Introduction.webp"
+      },
+      {
+       "name": "Maimai.png"
       },
       {
        "name": "pass-master.webp"
@@ -4729,6 +4879,9 @@
       },
       {
        "name": "暗色.webp"
+      },
+      {
+       "name": "李逵老母.webp"
       },
       {
        "name": "流光协奏.webp"
@@ -4820,6 +4973,9 @@
          "name": "51E979964985CD6E808EFAB96E24B0BB.gif"
         },
         {
+         "name": "7701F2F01F1E2C751F3D2ACD88AF5F07.gif"
+        },
+        {
          "name": "9955AB710F0A78FE850D16C33A4B3183.gif"
         },
         {
@@ -4850,6 +5006,9 @@
          "name": "捕获6 (2).webp"
         },
         {
+         "name": "赞.webp"
+        },
+        {
          "name": "鸠-oiiaoi.gif"
         },
         {
@@ -4862,6 +5021,9 @@
        "children": [
         {
          "name": "081DFE33666C87301F4554328075EEA6.webp"
+        },
+        {
+         "name": "0A801CF0CEEA0A2905D0F5A69D00DB63.webp"
         },
         {
          "name": "11CAD2DF7AD43B09321FEA77B03C8E80.gif"
@@ -5389,6 +5551,15 @@
          "name": "5e5e2c1f373ee836cd5bd4704c870370.gif"
         },
         {
+         "name": "60858AA5246178D911CA625D69DA3F77.gif"
+        },
+        {
+         "name": "860CCE03925103E394DDDFD1F5B15F76.webp"
+        },
+        {
+         "name": "CDE88C86DB000CC6C299F752CCBF1487.gif"
+        },
+        {
          "name": "d55432bd24edc88999f63b5dbd24f21f.webp"
         },
         {
@@ -5514,6 +5685,34 @@
        "name": "菜狗.webp"
       }
      ]
+    }
+   ]
+  },
+  {
+   "name": "洛苏音乐工具",
+   "children": [
+    {
+     "name": "public",
+     "children": [
+      {
+       "name": "app.js"
+      },
+      {
+       "name": "index.html"
+      },
+      {
+       "name": "style.css"
+      }
+     ]
+    },
+    {
+     "name": "package.json"
+    },
+    {
+     "name": "proxy.js"
+    },
+    {
+     "name": "洛苏音乐.exe"
     }
    ]
   },

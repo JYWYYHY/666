@@ -1,0 +1,15 @@
+# 默认：等级 5，输出到 E:\666\music-vbr5，保留原文件
+python convert_mp3_to_128kbps.py
+
+# 想要更接近原 128k 的平均体积、但音质略好：等级 5（就是默认）
+# 如果觉得体积还偏大，降到 6
+python convert_mp3_to_128kbps.py --quality 6
+
+# 想要音质更好、能接受更大体积
+python convert_mp3_to_128kbps.py --quality 4
+
+# 原地替换
+python convert_mp3_to_128kbps.py --in-place
+
+# 指定输出目录
+python convert_mp3_to_128kbps.py --out "E:\666\music_vbr"
