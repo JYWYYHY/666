@@ -35,7 +35,8 @@ __pycache__/
 venv/
 
 # ===== 脚本自身（保留可选的 gen_index.bat 可删除）=====
-gen_index.py
+/gen_index.py
+/gen_lnk_json.py
 
 # ===== 系统垃圾 =====
 .DS_Store
@@ -58,3 +59,4 @@ awa
 /README.md
 /.gitattributes
 /.gitignore
+/lnk.json

@@ -5,192 +5,385 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>📁 文件索引</title>
 <style>
+/* 若你的 cmdysj 字体不在 ./miscellaneous/ 下，改这个路径或整段删掉，会自动回退到系统衬线体 */
+@font-face{
+  font-family: "cmdysj";
+  src: local("cmdysj"),
+       url("./miscellaneous/cmdysj.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root{
-  --bg:#0d1117;--panel:#161b22;--panel2:#1c2128;--border:#30363d;
-  --fg:#e6edf3;--dim:#8b949e;--accent:#58a6ff;--hover:#21262d;
-  --sel:#1f6feb33;--sel-border:#1f6feb;
+  /* 参照 styles.css 的调色板 */
+  --night: #17141f;
+  --ink: #29202d;
+  --plum: #493744;
+  --gold: #e7ad62;
+  --ember: #bd684e;
+  --mist: rgba(226, 201, 197, 0.76);
+  --mist-light: rgba(246, 225, 211, 0.92);
+
+  /* 兼容原代码的变量名，其余 CSS 不动 */
+  --bg: #17141f;
+  --panel: rgba(41, 32, 45, 0.72);
+  --panel2: rgba(73, 55, 68, 0.55);
+  --border: rgba(231, 173, 98, 0.22);
+  --fg: rgba(246, 225, 211, 0.92);
+  --dim: rgba(226, 201, 197, 0.62);
+  --accent: #e7ad62;
+  --hover: rgba(231, 173, 98, 0.1);
+  --sel: rgba(231, 173, 98, 0.16);
+  --sel-border: rgba(231, 173, 98, 0.6);
+  --link: #e7ad62;
+  --local: #bd684e;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 [hidden]{display:none!important}
+
 body{
-  font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  background:var(--bg);color:var(--fg);font-size:14px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+  font-family: "cmdysj", "Noto Serif SC", "Songti SC", Georgia, serif;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(231, 173, 98, 0.14), transparent 42rem),
+    radial-gradient(circle at 100% 100%, rgba(189, 104, 78, 0.08), transparent 32rem),
+    linear-gradient(135deg, #17141f 0%, #241a24 55%, #473039 100%);
+  background-attachment: fixed;
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
+body::before{
+  position: fixed; inset: 0; z-index: -1; content: "";
+  background: radial-gradient(circle at 50% 8%, rgba(231, 173, 98, 0.1), transparent 30rem);
+  pointer-events: none;
+}
+
+::-webkit-scrollbar{ width: 10px; height: 10px; }
+::-webkit-scrollbar-track{ background: transparent; }
+::-webkit-scrollbar-thumb{
+  background: rgba(231, 173, 98, 0.22);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover{
+  background: rgba(231, 173, 98, 0.42);
+  background-clip: padding-box;
+}
+
 header{
-  position:sticky;top:0;z-index:100;
-  background:rgba(13,17,23,.82);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--border);padding:12px 20px;
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(23, 20, 31, 0.78);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border-bottom: 1px solid rgba(231, 173, 98, 0.18);
+  padding: 12px 20px;
+  box-shadow: 0 0.8rem 2rem rgba(11, 8, 16, 0.28);
 }
 .hd{max-width:1200px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.logo{font-size:16px;font-weight:700;white-space:nowrap;letter-spacing:.3px}
-.logo b{color:var(--accent)}
+.logo{
+  font-size: 16px; font-weight: 700; white-space: nowrap; letter-spacing: 0.12em;
+  color: var(--mist-light); text-shadow: 0 2px 12px rgba(9, 7, 14, 0.6);
+}
+.logo b{
+  background: linear-gradient(120deg, #f3c985, #e7ad62 60%, #bd684e);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: var(--gold);
+}
 .searchwrap{flex:1;position:relative;min-width:160px}
 .searchwrap::before{
-  content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);
-  font-size:13px;opacity:.6;pointer-events:none;
+  content: "🔍"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; opacity: 0.7; pointer-events: none;
 }
 #q{
-  width:100%;padding:8px 12px 8px 34px;border-radius:8px;
-  border:1px solid var(--border);background:var(--panel);color:var(--fg);
-  font-size:14px;font-family:inherit;outline:none;transition:.18s;
+  width: 100%; padding: 8px 14px 8px 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  background: rgba(41, 32, 45, 0.6);
+  color: var(--fg);
+  font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
-#q:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(88,166,255,.16);background:#0d1117}
+#q::placeholder{ color: rgba(226, 201, 197, 0.45); }
+#q:focus{
+  border-color: var(--gold);
+  background: rgba(23, 20, 31, 0.82);
+  box-shadow: 0 0 0 3px rgba(231, 173, 98, 0.16), 0 0 18px rgba(231, 173, 98, 0.12);
+}
 .actions{display:flex;gap:6px}
 body[data-view="explorer"] .actions{display:none}
 .btn{
-  background:var(--panel);border:1px solid var(--border);color:var(--dim);
-  border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;line-height:1;
-  font-family:inherit;transition:.15s;white-space:nowrap;
+  background: rgba(41, 32, 45, 0.6);
+  border: 1px solid rgba(231, 173, 98, 0.32);
+  color: var(--mist);
+  border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; font-size: 13px; line-height: 1;
+  font-family: inherit; white-space: nowrap;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
-.btn:hover{background:var(--panel2);color:var(--fg);border-color:var(--accent)}
-.btn.icon-only{padding:6px 8px}
+.btn:hover{
+  background: var(--gold); color: var(--ink);
+  border-color: var(--gold); transform: translateY(-1px);
+}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn:disabled:hover{background:rgba(41,32,45,.6);color:var(--mist);border-color:rgba(231,173,98,.32)}
+.btn.icon-only{padding:6px 9px}
 .src{
-  font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:20px;
-  padding:2px 10px;white-space:nowrap;max-width:42vw;overflow:hidden;text-overflow:ellipsis;
+  font-size: 11px; color: var(--dim);
+  border: 1px solid rgba(231, 173, 98, 0.22); border-radius: 20px;
+  padding: 2px 12px; white-space: nowrap;
+  max-width: 42vw; overflow: hidden; text-overflow: ellipsis;
+  background: rgba(41, 32, 45, 0.35);
 }
-.src.ok{color:#3fb950;border-color:rgba(63,185,80,.4)}
-main{max-width:1200px;margin:0 auto;padding:14px 20px 60px}
+.src.ok{ color: var(--gold); border-color: rgba(231, 173, 98, 0.45); }
+main{max-width:1200px;margin:0 auto;padding:18px 20px 60px}
 
 /* ============ 树形视图 ============ */
-.tree{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px 4px}
+.tree{
+  background: var(--panel);
+  border: 1px solid rgba(231, 173, 98, 0.18);
+  border-radius: 16px;
+  padding: 10px 6px;
+  box-shadow: 0 1rem 3rem rgba(11, 8, 16, 0.36);
+  backdrop-filter: blur(0.7rem);
+  -webkit-backdrop-filter: blur(0.7rem);
+  animation: panel-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(0.6rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 details.dir{margin:0}
 details.dir>summary{
-  list-style:none;cursor:pointer;padding:5px 10px;border-radius:7px;
+  list-style:none;cursor:pointer;padding:5px 12px;border-radius:9px;
   display:flex;align-items:center;gap:8px;font-weight:600;
-  user-select:none;transition:background .12s;
+  user-select:none;
+  transition: background 160ms ease, color 160ms ease;
 }
 details.dir>summary::-webkit-details-marker{display:none}
-details.dir>summary:hover{background:var(--hover)}
-details.dir>summary::before{
-  content:"";width:0;height:0;
-  border-left:5px solid var(--dim);
-  border-top:4px solid transparent;border-bottom:4px solid transparent;
-  transition:transform .15s;flex-shrink:0;
+details.dir>summary:hover{
+  background: linear-gradient(90deg, rgba(231, 173, 98, 0.12), transparent 90%);
+  color: var(--gold);
 }
-details.dir[open]>summary::before{transform:rotate(90deg)}
+details.dir>summary::before{
+  content:""; width:0; height:0;
+  border-left: 5px solid rgba(231, 173, 98, 0.55);
+  border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+  transition: transform 200ms ease, border-left-color 160ms ease;
+  flex-shrink: 0;
+}
+details.dir[open]>summary::before{transform: rotate(90deg); border-left-color: var(--gold);}
+details.dir[open]>summary{ color: var(--mist-light); }
+details.dir[open]>summary:hover{ color: var(--gold); }
 .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cnt{
-  font-size:11px;color:var(--dim);background:var(--panel2);
-  border:1px solid var(--border);padding:0 7px;border-radius:20px;
-  font-weight:400;flex-shrink:0;
+  font-size: 11px; color: var(--gold);
+  background: rgba(231, 173, 98, 0.1);
+  border: 1px solid rgba(231, 173, 98, 0.3);
+  padding: 0 8px; border-radius: 20px;
+  font-weight: 400; flex-shrink: 0;
 }
-.kids{margin-left:16px;border-left:1px solid var(--border);padding-left:6px}
+.kids{
+  margin-left: 16px;
+  border-left: 1px solid rgba(231, 173, 98, 0.16);
+  padding-left: 6px;
+}
 
 a.file{
-  display:flex;align-items:center;gap:8px;padding:4px 10px;margin:1px 0;
-  border-radius:7px;text-decoration:none;color:var(--fg);
-  transition:background .12s,color .12s;
+  display:flex;align-items:center;gap:8px;padding:4px 12px;margin:1px 0;
+  border-radius:9px;text-decoration:none;color:var(--fg);
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
-a.file:hover{background:var(--hover);color:var(--accent)}
+a.file:hover{
+  background: linear-gradient(90deg, rgba(231, 173, 98, 0.14), rgba(231, 173, 98, 0.02));
+  color: var(--gold);
+  transform: translateX(2px);
+}
 a.file .ic{font-size:13px;flex-shrink:0;opacity:.85}
 a.file .nm{font-weight:400;font-size:13.5px}
-a.file:hover .nm{text-decoration:underline;text-underline-offset:2px}
+a.file:hover .nm{text-decoration:underline;text-underline-offset:3px;text-decoration-color: rgba(231,173,98,.6)}
+a.file.local-link{color:var(--fg)}
+a.file.local-link:hover{color:var(--local)}
+a.file.local-link:hover .nm{text-decoration:none;color:var(--local)}
+a.file.ext-link .nm{color:var(--gold)}
+a.file.ext-link:hover .nm{color:#f3c985}
+.ext-badge{
+  font-size: 10px; padding: 1px 7px; border-radius: 999px; flex-shrink: 0;
+  background: rgba(231, 173, 98, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(231, 173, 98, 0.4);
+  font-weight: 400;
+}
+.ext-badge.local{
+  background: rgba(189, 104, 78, 0.12);
+  color: var(--local);
+  border-color: rgba(189, 104, 78, 0.42);
+}
 
 /* ============ 资源管理器 ============ */
 .explorer{
-  background:var(--panel);border:1px solid var(--border);border-radius:12px;
-  overflow:hidden;display:flex;flex-direction:column;min-height:60vh;
+  background: var(--panel);
+  border: 1px solid rgba(231, 173, 98, 0.18);
+  border-radius: 16px;
+  overflow: hidden; display: flex; flex-direction: column; min-height: 60vh;
+  box-shadow: 0 1rem 3rem rgba(11, 8, 16, 0.36);
+  backdrop-filter: blur(0.7rem);
+  -webkit-backdrop-filter: blur(0.7rem);
+  animation: panel-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .exp-toolbar{
-  display:flex;align-items:center;gap:6px;padding:8px 10px;
-  background:var(--panel2);border-bottom:1px solid var(--border);flex-wrap:wrap;
+  display:flex;align-items:center;gap:6px;padding:9px 12px;
+  background: rgba(23, 20, 31, 0.55);
+  border-bottom: 1px solid rgba(231, 173, 98, 0.16);
+  flex-wrap: wrap;
 }
 .nav-btn{
-  background:var(--panel);border:1px solid var(--border);color:var(--fg);
-  width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;
-  display:inline-flex;align-items:center;justify-content:center;transition:.15s;
+  background: rgba(41, 32, 45, 0.6);
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  color: var(--fg);
+  width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
-.nav-btn:hover:not(:disabled){background:var(--hover);border-color:var(--accent)}
+.nav-btn:hover:not(:disabled){ background: var(--gold); color: var(--ink); border-color: var(--gold); }
 .nav-btn:disabled{opacity:.35;cursor:not-allowed}
 .breadcrumb{
   flex:1;display:flex;align-items:center;gap:2px;flex-wrap:wrap;
-  background:var(--panel);border:1px solid var(--border);border-radius:6px;
-  padding:2px 8px;min-height:30px;min-width:200px;
+  background: rgba(23, 20, 31, 0.55);
+  border: 1px solid rgba(231, 173, 98, 0.2);
+  border-radius: 9px;
+  padding: 2px 10px; min-height: 32px; min-width: 200px;
 }
 .crumb{
-  padding:3px 6px;border-radius:4px;cursor:pointer;font-size:13px;
-  color:var(--fg);transition:.12s;white-space:nowrap;
+  padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  color: var(--fg); transition: color 160ms ease, background 160ms ease;
+  white-space: nowrap;
 }
-.crumb:hover{background:var(--hover);color:var(--accent)}
-.crumb.current{font-weight:600;cursor:default}
-.crumb.current:hover{background:transparent;color:var(--fg)}
-.crumb-sep{color:var(--dim);font-size:12px;user-select:none}
+.crumb:hover{ background: var(--hover); color: var(--gold); }
+.crumb.current{ font-weight: 600; cursor: default; color: var(--gold); }
+.crumb.current:hover{ background: transparent; color: var(--gold); }
+.crumb-sep{ color: rgba(231, 173, 98, 0.5); font-size: 12px; user-select: none; }
 .toolbar-right{display:flex;gap:6px;align-items:center}
 .sort-select{
-  background:var(--panel);border:1px solid var(--border);color:var(--fg);
-  border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit;
-  cursor:pointer;outline:none;height:30px;
+  background: rgba(41, 32, 45, 0.6);
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  color: var(--fg);
+  border-radius: 9px; padding: 5px 10px; font-size: 13px; font-family: inherit;
+  cursor: pointer; outline: none; height: 32px;
+  transition: border-color 160ms ease;
 }
-.sort-select:focus{border-color:var(--accent)}
+.sort-select:focus{ border-color: var(--gold); box-shadow: 0 0 0 3px rgba(231,173,98,.14); }
+.sort-select option{ background: #241a24; color: var(--fg); }
 .view-toggle{
-  background:var(--panel);border:1px solid var(--border);color:var(--dim);
-  width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;
-  display:inline-flex;align-items:center;justify-content:center;transition:.15s;
+  background: rgba(41, 32, 45, 0.6);
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  color: var(--dim);
+  width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
 }
-.view-toggle:hover{color:var(--fg);border-color:var(--accent)}
-.view-toggle.active{background:var(--sel);color:var(--accent);border-color:var(--sel-border)}
+.view-toggle:hover{ color: var(--fg); border-color: var(--gold); }
+.view-toggle.active{
+  background: rgba(231, 173, 98, 0.18);
+  color: var(--gold);
+  border-color: var(--sel-border);
+}
 
 .exp-body{display:flex;flex:1;min-height:0}
 .exp-sidebar{
-  width:240px;flex-shrink:0;border-right:1px solid var(--border);
-  overflow-y:auto;max-height:calc(60vh + 200px);padding:6px 4px;background:var(--panel);
+  width: 250px; flex-shrink: 0;
+  border-right: 1px solid rgba(231, 173, 98, 0.14);
+  overflow-y: auto; max-height: calc(60vh + 200px);
+  padding: 8px 6px;
+  background: rgba(23, 20, 31, 0.32);
 }
 .exp-sidebar:empty{display:none}
 .nav-dir{margin:0}
 .nav-dir>summary{
-  list-style:none;cursor:pointer;padding:4px 8px;border-radius:6px;
+  list-style:none;cursor:pointer;padding:4px 10px;border-radius:8px;
   display:flex;align-items:center;gap:6px;font-size:13px;
-  user-select:none;transition:background .12s;
+  user-select:none;
   overflow:hidden;white-space:nowrap;
+  transition: background 160ms ease, color 160ms ease;
 }
 .nav-dir>summary::-webkit-details-marker{display:none}
-.nav-dir>summary:hover{background:var(--hover)}
+.nav-dir>summary:hover{ background: var(--hover); color: var(--gold); }
 .nav-dir>summary::before{
   content:"";width:0;height:0;flex-shrink:0;
-  border-left:5px solid var(--dim);
-  border-top:4px solid transparent;border-bottom:4px solid transparent;
-  transition:transform .15s;
+  border-left: 5px solid rgba(231, 173, 98, 0.55);
+  border-top: 4px solid transparent;border-bottom: 4px solid transparent;
+  transition: transform 200ms ease;
 }
 .nav-dir[open]>summary::before{transform:rotate(90deg)}
-.nav-dir>summary.selected{background:var(--sel);color:var(--accent)}
-.nav-kids{margin-left:14px;border-left:1px solid var(--border);padding-left:4px}
+.nav-dir>summary.selected{
+  background: rgba(231, 173, 98, 0.16);
+  color: var(--gold);
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+.nav-kids{
+  margin-left: 14px;
+  border-left: 1px solid rgba(231, 173, 98, 0.12);
+  padding-left: 4px;
+}
 .nav-name{overflow:hidden;text-overflow:ellipsis}
 
-.exp-main{flex:1;overflow-y:auto;min-height:40vh;max-height:calc(60vh + 200px)}
+.exp-main{flex:1;overflow-y:auto;min-height:40vh;max-height:calc(60vh + 200px);outline:none}
 
 /* 列表视图 */
 .list-view{width:100%;border-collapse:collapse;font-size:13.5px}
 .list-view thead th{
-  text-align:left;padding:8px 12px;background:var(--panel2);
-  border-bottom:1px solid var(--border);font-weight:600;font-size:12px;
-  color:var(--dim);position:sticky;top:0;z-index:1;cursor:pointer;user-select:none;
-  white-space:nowrap;
+  text-align: left; padding: 9px 14px;
+  background: rgba(23, 20, 31, 0.7);
+  border-bottom: 1px solid rgba(231, 173, 98, 0.2);
+  font-weight: 600; font-size: 12px;
+  color: var(--gold);
+  position: sticky; top: 0; z-index: 1; cursor: pointer; user-select: none;
+  white-space: nowrap; letter-spacing: 0.06em;
+  backdrop-filter: blur(6px);
 }
-.list-view thead th:hover{color:var(--fg)}
-.list-view thead th .sort-arrow{color:var(--accent);margin-left:4px}
-.list-view tbody tr{cursor:default}
-.list-view tbody tr:hover{background:var(--hover)}
-.list-view tbody tr.selected{background:var(--sel)}
-.list-view td{padding:6px 12px;border-bottom:1px solid rgba(48,54,61,.4)}
+.list-view thead th:hover{ color: #f3c985; }
+.list-view thead th .sort-arrow{ color: var(--gold); margin-left: 4px; }
+.list-view tbody tr{cursor:default; transition: background 140ms ease, box-shadow 140ms ease;}
+.list-view tbody tr:hover{ background: var(--hover); }
+.list-view tbody tr.selected{
+  background: linear-gradient(90deg, rgba(231, 173, 98, 0.18), rgba(231, 173, 98, 0.04));
+  box-shadow: inset 2px 0 0 var(--gold);
+}
+.list-view td{padding:7px 14px;border-bottom:1px solid rgba(231, 173, 98, 0.06)}
 .list-view td.name-cell{display:flex;align-items:center;gap:8px;min-width:0}
 .list-view td.name-cell .ic{flex-shrink:0}
 .list-view td.name-cell .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.list-view td.type-cell{color:var(--dim);font-size:12.5px;white-space:nowrap;width:140px}
+.list-view td.type-cell{color:var(--dim);font-size:12.5px;white-space:nowrap;width:150px}
+.list-view tr[data-link="url"] td.name-cell .nm{ color: var(--gold); }
+.list-view tr[data-link="app"] td.name-cell .nm,
+.list-view tr[data-link="dir"] td.name-cell .nm{ color: var(--local); }
 
 /* 图标视图 */
 .icon-view{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:6px;padding:12px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px; padding: 14px;
 }
 .icon-item{
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  padding:12px 8px;border-radius:8px;cursor:default;
-  transition:background .12s;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding: 14px 8px; border-radius: 12px; cursor: default;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
-.icon-item:hover{background:var(--hover)}
-.icon-item.selected{background:var(--sel)}
-.icon-item .big-icon{font-size:36px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.icon-item:hover{
+  background: var(--hover);
+  border-color: rgba(231, 173, 98, 0.22);
+  transform: translateY(-2px);
+}
+.icon-item.selected{
+  background: rgba(231, 173, 98, 0.14);
+  border-color: var(--sel-border);
+}
+.icon-item .big-icon{
+  font-size: 36px; line-height: 1;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 8px rgba(231, 173, 98, 0.15));
+}
 .icon-item .icon-label{
   font-size:12.5px;text-align:center;word-break:break-all;
   max-height:2.8em;overflow:hidden;display:-webkit-box;
@@ -201,59 +394,112 @@ a.file:hover .nm{text-decoration:underline;text-underline-offset:2px}
 
 /* ============ 设置对话框 ============ */
 dialog#settings{
-  border:1px solid var(--border);background:var(--panel);color:var(--fg);
-  border-radius:12px;padding:0;max-width:480px;width:calc(100vw - 40px);
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  border: 1px solid rgba(231, 173, 98, 0.35);
+  background: rgba(41, 32, 45, 0.94);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  color: var(--fg);
+  border-radius: 16px; padding: 0;
+  max-width: 480px; width: calc(100vw - 40px);
+  box-shadow: 0 1.5rem 4rem rgba(11, 8, 16, 0.6);
 }
-dialog#settings::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+dialog#settings::backdrop{ background: rgba(11, 8, 16, 0.62); backdrop-filter: blur(3px); }
 .dlg-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px;border-bottom:1px solid var(--border);
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(231, 173, 98, 0.2);
 }
-.dlg-header h3{font-size:15px;font-weight:600}
+.dlg-header h3{font-size:15px;font-weight:600;color:var(--gold);letter-spacing:0.06em}
 .dlg-close{
-  background:transparent;border:none;color:var(--dim);font-size:18px;
-  cursor:pointer;padding:2px 8px;border-radius:4px;transition:.12s;
+  background: transparent; border: none; color: var(--dim); font-size: 18px;
+  cursor: pointer; padding: 2px 9px; border-radius: 8px;
+  transition: background 160ms ease, color 160ms ease;
 }
-.dlg-close:hover{background:var(--hover);color:var(--fg)}
-.dlg-body{padding:16px 18px;display:flex;flex-direction:column;gap:18px}
+.dlg-close:hover{ background: var(--hover); color: var(--gold); }
+.dlg-body{padding:18px 20px;display:flex;flex-direction:column;gap:20px}
 .fieldset{border:none}
-.fieldset legend{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.fieldset legend{
+  font-size: 12px; color: var(--gold); letter-spacing: 0.12em; margin-bottom: 10px;
+  text-transform: uppercase; opacity: 0.85;
+}
 .radio-group{display:flex;flex-direction:column;gap:8px}
 .radio-group label{
-  display:flex;align-items:center;gap:10px;cursor:pointer;
-  padding:10px 12px;border:1px solid var(--border);border-radius:8px;
-  transition:.15s;
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  padding: 11px 14px;
+  border: 1px solid rgba(231, 173, 98, 0.18);
+  border-radius: 10px;
+  transition: background 160ms ease, border-color 160ms ease;
 }
-.radio-group label:hover{background:var(--hover);border-color:var(--dim)}
-.radio-group label:has(input:checked){background:var(--sel);border-color:var(--sel-border)}
-.radio-group input{accent-color:var(--accent);cursor:pointer}
-.radio-group .opt-name{font-weight:600;font-size:13.5px}
-.radio-group .opt-desc{font-size:11.5px;color:var(--dim);margin-top:2px}
+.radio-group label:hover{ background: var(--hover); border-color: rgba(231, 173, 98, 0.4); }
+.radio-group label:has(input:checked){
+  background: rgba(231, 173, 98, 0.12);
+  border-color: var(--sel-border);
+}
+.radio-group input{ accent-color: var(--gold); cursor: pointer; }
+.radio-group .opt-name{ font-weight: 600; font-size: 13.5px; color: var(--mist-light); }
+.radio-group .opt-desc{ font-size: 11.5px; color: var(--dim); margin-top: 2px; }
 .select-wrap{display:flex;align-items:center;gap:10px;font-size:13px}
 .select-wrap select{
-  flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--fg);
-  border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;
-  cursor:pointer;outline:none;
+  flex: 1;
+  background: rgba(23, 20, 31, 0.7);
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  color: var(--fg);
+  border-radius: 9px; padding: 7px 12px; font-size: 13px; font-family: inherit;
+  cursor: pointer; outline: none;
+  transition: border-color 160ms ease;
 }
-.select-wrap select:focus{border-color:var(--accent)}
+.select-wrap select:focus{ border-color: var(--gold); }
+.select-wrap select option{ background: #241a24; color: var(--fg); }
 
-/* ============ 状态 ============ */
+/* ============ 状态 / Toast ============ */
 .hide{display:none!important}
 #status{text-align:center;color:var(--dim);padding:60px 20px;font-size:14px}
 .spinner{
-  width:28px;height:28px;border:3px solid var(--border);
-  border-top-color:var(--accent);border-radius:50%;
-  animation:spin .8s linear infinite;margin:0 auto 14px;
+  width:30px;height:30px;
+  border: 3px solid rgba(231, 173, 98, 0.16);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 16px;
+  box-shadow: 0 0 18px rgba(231, 173, 98, 0.2);
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 #empty{text-align:center;color:var(--dim);padding:60px 20px}
-footer{text-align:center;color:var(--dim);font-size:12px;padding:10px 20px 40px}
-kbd{
-  background:var(--panel2);border:1px solid var(--border);border-bottom-width:2px;
-  border-radius:4px;padding:1px 5px;font-size:11px;font-family:inherit;
+#toast{
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(41, 32, 45, 0.94);
+  border: 1px solid rgba(231, 173, 98, 0.55);
+  color: #fff0df;
+  padding: 11px 20px;
+  border-radius: 10px; font-size: 13px; line-height: 1.5;
+  opacity: 0; pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+  z-index: 999;
+  max-width: calc(100vw - 40px); word-break: break-all;
+  box-shadow: 0 0.8rem 2rem rgba(11, 8, 16, 0.55);
+  backdrop-filter: blur(12px);
 }
-code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{
+  text-align: center; color: var(--dim); font-size: 12px;
+  padding: 14px 20px 40px;
+  letter-spacing: 0.04em;
+}
+kbd{
+  background: rgba(41, 32, 45, 0.7);
+  border: 1px solid rgba(231, 173, 98, 0.28);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px; font-size: 11px; font-family: inherit;
+  color: var(--gold);
+}
+code{
+  background: rgba(41, 32, 45, 0.7);
+  border: 1px solid rgba(231, 173, 98, 0.16);
+  padding: 1px 6px; border-radius: 5px; font-size: 12px;
+  color: #f3c985;
+}
 @media(max-width:700px){
   .kids{margin-left:8px;padding-left:4px}
   .src{display:none}
@@ -261,6 +507,7 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
   .breadcrumb{min-width:120px}
   .list-view td.type-cell{display:none}
   .list-view thead th.col-type{display:none}
+  body{background-attachment: scroll;}
 }
 </style>
 </head>
@@ -312,7 +559,9 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
   <div id="empty" hidden>没有找到匹配的文件 🤷</div>
 </main>
 
-<footer>按 <kbd>/</kbd> 聚焦搜索 · <kbd>Esc</kbd> 清空 · 展开状态 / 视图偏好自动记忆</footer>
+<footer>
+  按 <kbd>/</kbd> 聚焦搜索 · <kbd>Esc</kbd> 清空 · 资源管理器支持 <kbd>↑</kbd><kbd>↓</kbd> 选择、<kbd>Enter</kbd> 打开、<kbd>Backspace</kbd> 返回上一级 · 快捷方式由 <code>lnk.json</code> 决定跳转
+</footer>
 
 <dialog id="settings">
   <div class="dlg-header">
@@ -334,7 +583,7 @@ code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
           <input type="radio" name="mainView" value="explorer">
           <div>
             <div class="opt-name">🗂️ 资源管理器</div>
-            <div class="opt-desc">左侧目录树 + 右侧文件列表，支持面包屑与后退/前进</div>
+            <div class="opt-desc">左侧目录树 + 右侧文件列表，支持面包屑、后退/前进与键盘导航</div>
           </div>
         </label>
       </div>
@@ -373,8 +622,10 @@ const CONFIG = {
   sources: ['index.json', 'api', 'folder_structure.txt'],
   ignoreFile: '.indexignore',
   applyIgnoreFile: true,
+  linkMapFile: 'lnk.json',
 };
-const MUST_EXCLUDE = new Set(['index.json', 'gen_index.py', '.indexignore']);
+
+const SELF_FILES = new Set(['index.html', 'index.json', '.indexignore', 'gen_index.py', 'gen_lnk_json.py', 'lnk.json']);
 
 const STORAGE = {
   tree:    'file-index:tree-state',
@@ -407,7 +658,7 @@ const FILE_ICONS = {
   mp4:'🎬',mkv:'🎬',avi:'🎬',wtv:'🎬',mov:'🎬',webm:'🎬',
   png:'🖼️',jpg:'🖼️',jpeg:'🖼️',gif:'🖼️',webp:'🖼️',bmp:'🖼️',ico:'🖼️',jfif:'🖼️',svg:'🖼️',
   txt:'📄',md:'📝',pdf:'📕',pptx:'📊',docx:'📘',xlsx:'📗',
-  json:'🧾',html:'🌐',htm:'🌐',xml:'🧾',url:'🌐',
+  json:'🧾',html:'🌐',htm:'🌐',xml:'🧾',url:'🔗',
   lnk:'🔗',cmd:'⌨️',bat:'⌨️',ps1:'⌨️',py:'🐍',js:'🟨',css:'🎨',
   ttf:'🔤',otf:'🔤',ani:'🖱️',cur:'🖱️',inf:'⚙️',
   dll:'📦',pdb:'📦',config:'⚙️'
@@ -431,10 +682,95 @@ function extOf(name){
 function iconFor(name){
   return FILE_ICONS[extOf(name)] || '📄';
 }
-function typeOf(node){
+
+/* ============================================================
+   lnk.json：快捷方式映射
+   ============================================================ */
+let linkMap = {};
+
+function normalizeLinkMap(raw){
+  const map = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return map;
+  for (const [k, v] of Object.entries(raw)){
+    let key = String(k).replace(/\\/g, '/').replace(/^\/+/, '');
+    if (typeof v === 'string'){
+      map[key] = { type: 'url', target: v };
+    } else if (v && typeof v === 'object'){
+      if (v.url){
+        map[key] = { type: 'url', target: String(v.url) };
+      } else if (v.target){
+        const t = String(v.target);
+        const type = v.type === 'app' || v.type === 'dir' ? v.type
+                   : (/^(https?|ftp|mailto):/i.test(t) ? 'url' : 'url');
+        map[key] = { type, target: t };
+      }
+    }
+  }
+  return map;
+}
+
+async function loadLinkMap(){
+  try{
+    const res = await fetch(CONFIG.linkMapFile, {cache: 'no-cache'});
+    if (!res.ok) return {};
+    return await res.json();
+  }catch(_){ return {}; }
+}
+
+function typeLabelFor(node, path){
   if (node.children) return '文件夹';
+  const link = linkMap[path];
+  if (link){
+    if (link.type === 'url') return '网页链接';
+    if (link.type === 'app') return '本地程序';
+    if (link.type === 'dir') return '本地文件夹';
+  }
   const ext = extOf(node.name);
   return TYPE_LABELS[ext] || (ext ? ext.toUpperCase() + ' 文件' : '文件');
+}
+function iconForNode(node, path){
+  if (node.children) return '📁';
+  const link = linkMap[path];
+  if (link){
+    if (link.type === 'url') return '🌐';
+    if (link.type === 'app') return '🖥️';
+    if (link.type === 'dir') return '📂';
+  }
+  return iconFor(node.name);
+}
+
+/* ============================================================
+   Toast / 剪贴板
+   ============================================================ */
+let toastTimer = null;
+function showToast(msg){
+  let t = document.getElementById('toast');
+  if (!t){
+    t = document.createElement('div');
+    t.id = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+async function copyText(text){
+  try{
+    if (navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(_){}
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(_){}
+  document.body.removeChild(ta);
+  return true;
 }
 
 /* ============================================================
@@ -514,9 +850,9 @@ async function loadIgnoreRules(url){
 function filterTree(nodes, parentPath, rules){
   const out = [];
   for (const node of nodes){
-    if (MUST_EXCLUDE.has(node.name)) continue;
     const p = parentPath ? parentPath + '/' + node.name : node.name;
     const isDir = !!node.children;
+    if (!parentPath && !isDir && SELF_FILES.has(node.name)) continue;
     if (isIgnored(p, isDir, rules)) continue;
     if (isDir) out.push({name: node.name, children: filterTree(node.children, p, rules)});
     else       out.push({name: node.name});
@@ -668,12 +1004,10 @@ async function loadAll(){
       if (!result || !result.nodes || !result.nodes.length){
         errors.push(`${src}: 空结果`); continue;
       }
-      let nodes = result.nodes, label = result.label;
-      if (rules.length){
-        nodes = filterTree(nodes, '', rules);
-        label += ` · ${CONFIG.ignoreFile}(${rules.length})`;
-        if (!nodes.length){ errors.push(`${src}: 应用排除规则后为空`); continue; }
-      }
+      let nodes = filterTree(result.nodes, '', rules);
+      let label = result.label;
+      if (rules.length) label += ` · ${CONFIG.ignoreFile}(${rules.length})`;
+      if (!nodes.length){ errors.push(`${src}: 应用排除规则后为空`); continue; }
       return {nodes, label};
     } catch(e){
       errors.push(`${src}: ${e.message}`);
@@ -698,12 +1032,12 @@ function sortChildren(nodes, key, dir){
   const copy = [...nodes];
   copy.sort((a, b) => {
     const ad = !!a.children, bd = !!b.children;
-    if (ad !== bd) return ad ? -1 : 1;   // 目录永远在前
+    if (ad !== bd) return ad ? -1 : 1;
     let c = 0;
     if (key === 'name'){
       c = a.name.localeCompare(b.name, 'zh-CN', {numeric: true});
     } else if (key === 'type'){
-      const at = typeOf(a), bt = typeOf(b);
+      const at = typeLabelFor(a, ''), bt = typeLabelFor(b, '');
       c = at.localeCompare(bt, 'zh-CN');
       if (c === 0) c = a.name.localeCompare(b.name, 'zh-CN', {numeric: true});
     }
@@ -732,6 +1066,8 @@ function getNodeByPath(nodes, path){
    树形视图
    ============================================================ */
 const treeEl = document.getElementById('tree');
+const expandBtn   = document.getElementById('expandAll');
+const collapseBtn = document.getElementById('collapseAll');
 let dirCache = null;
 let filteringTree = false;
 let treeSaveTimer = null;
@@ -739,6 +1075,24 @@ let treeSaveTimer = null;
 function renderTreeNode(node, parentPath, depth){
   if (!node.children){
     const p = parentPath ? parentPath + '/' + node.name : node.name;
+    const link = linkMap[p];
+    if (link && link.type === 'url'){
+      return `<a class="file ext-link" href="${esc(link.target)}" target="_blank" rel="noopener"` +
+             ` data-path="${esc(p.toLowerCase())}" title="${esc(p)} → ${esc(link.target)}">` +
+             `<span class="ic">🌐</span>` +
+             `<span class="nm">${esc(node.name)}</span>` +
+             `<span class="ext-badge">↗</span></a>`;
+    }
+    if (link && (link.type === 'app' || link.type === 'dir')){
+      return `<a class="file local-link" href="#"` +
+             ` data-path="${esc(p.toLowerCase())}"` +
+             ` data-link="${esc(link.type)}"` +
+             ` data-target="${esc(link.target)}"` +
+             ` title="${esc(p)} → ${esc(link.target)}">` +
+             `<span class="ic">${link.type === 'dir' ? '📂' : '🖥️'}</span>` +
+             `<span class="nm">${esc(node.name)}</span>` +
+             `<span class="ext-badge local">本地</span></a>`;
+    }
     return `<a class="file" href="${fileUrl(p)}" target="_blank" rel="noopener"` +
            ` data-path="${esc(p.toLowerCase())}" title="${esc(p)}">` +
            `<span class="ic">${iconFor(node.name)}</span>` +
@@ -769,22 +1123,42 @@ function applyTreeState(){
     d.open = (d.dataset.path in state) ? !!state[d.dataset.path] : false;
   });
 }
+function updateTreeButtons(){
+  expandBtn.disabled   = filteringTree;
+  collapseBtn.disabled = filteringTree;
+  const tip = filteringTree ? '搜索中不可用，清空搜索后可用' : '';
+  expandBtn.title   = tip || '全部展开';
+  collapseBtn.title = tip || '全部收起';
+}
 function setAllTreeOpen(open){
+  if (filteringTree) return;
   const state = loadTreeState();
   treeEl.querySelectorAll('details.dir').forEach(d => {
-    if (filteringTree && d.classList.contains('hide')) return;
     d.open = open;
-    if (!filteringTree) state[d.dataset.path] = open;
+    state[d.dataset.path] = open;
   });
-  if (!filteringTree) lsSet(STORAGE.tree, state);
+  lsSet(STORAGE.tree, state);
 }
-
 treeEl.addEventListener('toggle', e => {
   if (!(e.target instanceof HTMLDetailsElement)) return;
   if (!e.target.classList.contains('dir')) return;
   if (filteringTree) return;
   saveTreeState();
 }, true);
+
+treeEl.addEventListener('click', e => {
+  const a = e.target.closest('a.local-link');
+  if (!a) return;
+  e.preventDefault();
+  const target = a.dataset.target || '';
+  const type = a.dataset.link;
+  if (!target){
+    showToast('该快捷方式尚未配置目标路径，请在 lnk.json 中补充');
+    return;
+  }
+  copyText(target);
+  showToast(`已复制${type === 'dir' ? '文件夹' : '程序'}路径：${target}`);
+});
 
 function filterTreeView(q){
   q = q.trim().toLowerCase();
@@ -796,15 +1170,20 @@ function filterTreeView(q){
     files.forEach(f => f.classList.remove('hide'));
     dirCache.forEach(d => d.classList.remove('hide'));
     applyTreeState();
+    updateTreeButtons();
     return true;
   }
+
   filteringTree = true;
+  updateTreeButtons();
+
   let visible = 0;
   files.forEach(f => {
     const hit = f.dataset.path.includes(q);
     f.classList.toggle('hide', !hit);
     if (hit) visible++;
   });
+
   const sorted = dirCache.slice().sort(
     (a, b) => Number(b.dataset.depth) - Number(a.dataset.depth)
   );
@@ -842,6 +1221,7 @@ const expState = {
 };
 
 let selectedEl = null;
+let selectedIndex = -1;
 
 function loadExpState(){
   const saved = lsGet(STORAGE.exp, null);
@@ -865,13 +1245,11 @@ function saveExpState(){
     sortDir: expState.sortDir,
   });
 }
-
 function pathExists(path){
   if (!path.length) return true;
   const node = getNodeByPath(currentData.nodes, path);
   return !!(node && node.children);
 }
-
 function navigate(path, pushHistory = true){
   if (!pathExists(path)) return;
   expState.path = [...path];
@@ -883,7 +1261,6 @@ function navigate(path, pushHistory = true){
   saveExpState();
   renderExplorer();
 }
-
 function goBack(){
   if (expState.historyIndex > 0){
     expState.historyIndex--;
@@ -906,7 +1283,43 @@ function goUp(){
   }
 }
 
-/* 左侧导航树 */
+function getItems(){
+  return Array.from(mainEl.querySelectorAll('tr[data-path], .icon-item[data-path]'));
+}
+function selectItem(index, scroll = true){
+  const items = getItems();
+  if (!items.length){ selectedIndex = -1; return; }
+  selectedIndex = Math.max(0, Math.min(index, items.length - 1));
+  if (selectedEl) selectedEl.classList.remove('selected');
+  selectedEl = items[selectedIndex];
+  selectedEl.classList.add('selected');
+  if (scroll) selectedEl.scrollIntoView({block: 'nearest'});
+}
+
+function openItem(el){
+  if (!el) return;
+  const path = el.dataset.path;
+  const link = linkMap[path];
+  if (link && link.type === 'url'){
+    window.open(link.target, '_blank', 'noopener');
+    return;
+  }
+  if (link && (link.type === 'app' || link.type === 'dir')){
+    if (!link.target){
+      showToast('该快捷方式尚未配置目标路径，请在 lnk.json 中补充');
+      return;
+    }
+    copyText(link.target);
+    showToast(`已复制${link.type === 'dir' ? '文件夹' : '程序'}路径：${link.target}`);
+    return;
+  }
+  if (el.dataset.isDir === 'true'){
+    navigate(path.split('/'));
+  } else {
+    window.open(fileUrl(path), '_blank', 'noopener');
+  }
+}
+
 function renderSidebar(currentPath){
   const curStr = currentPath.join('/');
   const render = (nodes, parentPath) => nodes.map(n => {
@@ -925,10 +1338,8 @@ function renderSidebar(currentPath){
   sidebarEl.innerHTML = render(currentData.nodes, '');
 }
 
-/* 面包屑 */
 function renderBreadcrumb(path){
-  let html = `<span class="crumb${path.length ? '' : ' current'}" data-crumb="">` +
-    `📁 根目录</span>`;
+  let html = `<span class="crumb${path.length ? '' : ' current'}" data-crumb="">📁 根目录</span>`;
   path.forEach((seg, i) => {
     const isLast = i === path.length - 1;
     html += `<span class="crumb-sep">›</span>`;
@@ -937,7 +1348,6 @@ function renderBreadcrumb(path){
   breadcrumbEl.innerHTML = html;
 }
 
-/* 右侧内容 */
 function renderContent(node, filter){
   const curPath = expState.path;
   const children = node && node.children ? node.children : [];
@@ -951,9 +1361,7 @@ function renderContent(node, filter){
   const sorted = sortChildren(filtered, expState.sortKey, expState.sortDir);
 
   if (!sorted.length){
-    mainEl.innerHTML = `<div class="exp-empty">${
-      filter ? '没有匹配的项目' : '此文件夹为空'
-    }</div>`;
+    mainEl.innerHTML = `<div class="exp-empty">${filter ? '没有匹配的项目' : '此文件夹为空'}</div>`;
     return;
   }
 
@@ -961,8 +1369,12 @@ function renderContent(node, filter){
     mainEl.innerHTML = `<div class="icon-view">${sorted.map(c => {
       const p = (curPath.join('/') + '/' + c.name).replace(/^\//, '');
       const isDir = !!c.children;
-      return `<div class="icon-item" data-path="${esc(p)}" data-is-dir="${isDir}" title="${esc(p)}">` +
-        `<span class="big-icon">${isDir ? '📁' : iconFor(c.name)}</span>` +
+      const link = linkMap[p];
+      const linkType = link ? link.type : '';
+      return `<div class="icon-item" data-path="${esc(p)}" data-is-dir="${isDir}"` +
+        (linkType ? ` data-link="${esc(linkType)}"` : '') +
+        ` title="${esc(p)}">` +
+        `<span class="big-icon">${iconForNode(c, p)}</span>` +
         `<span class="icon-label">${esc(c.name)}</span></div>`;
     }).join('')}</div>`;
   } else {
@@ -978,10 +1390,13 @@ function renderContent(node, filter){
       <tbody>${sorted.map(c => {
         const p = (curPath.join('/') + '/' + c.name).replace(/^\//, '');
         const isDir = !!c.children;
-        return `<tr data-path="${esc(p)}" data-is-dir="${isDir}">
-          <td class="name-cell"><span class="ic">${isDir ? '📁' : iconFor(c.name)}</span>` +
+        const link = linkMap[p];
+        const linkType = link ? link.type : '';
+        return `<tr data-path="${esc(p)}" data-is-dir="${isDir}"` +
+          (linkType ? ` data-link="${esc(linkType)}"` : '') + `>
+          <td class="name-cell"><span class="ic">${iconForNode(c, p)}</span>` +
           `<span class="nm">${esc(c.name)}</span></td>
-          <td class="type-cell">${typeOf(c)}</td></tr>`;
+          <td class="type-cell">${typeLabelFor(c, p)}</td></tr>`;
       }).join('')}</tbody>
     </table>`;
   }
@@ -1006,10 +1421,11 @@ function renderExplorer(){
   document.querySelectorAll('[data-exp-view]').forEach(b => {
     b.classList.toggle('active', b.dataset.expView === expState.viewMode);
   });
+
   selectedEl = null;
+  selectedIndex = -1;
 }
 
-/* 左侧导航点击 */
 sidebarEl.addEventListener('click', e => {
   const sum = e.target.closest('summary');
   if (!sum) return;
@@ -1019,7 +1435,6 @@ sidebarEl.addEventListener('click', e => {
   navigate(details.dataset.path.split('/'));
 });
 
-/* 面包屑点击 */
 breadcrumbEl.addEventListener('click', e => {
   const crumb = e.target.closest('[data-crumb]');
   if (!crumb || crumb.classList.contains('current')) return;
@@ -1027,7 +1442,6 @@ breadcrumbEl.addEventListener('click', e => {
   navigate(p ? p.split('/') : []);
 });
 
-/* 内容区点击 / 双击 / 键盘 */
 mainEl.addEventListener('click', e => {
   const col = e.target.closest('th[data-sort]');
   if (col){
@@ -1044,19 +1458,22 @@ mainEl.addEventListener('click', e => {
   }
   const item = e.target.closest('tr[data-path], .icon-item[data-path]');
   if (selectedEl) selectedEl.classList.remove('selected');
-  if (item){ item.classList.add('selected'); selectedEl = item; }
-  else selectedEl = null;
+  if (item){
+    item.classList.add('selected');
+    selectedEl = item;
+    selectedIndex = getItems().indexOf(item);
+  } else {
+    selectedEl = null;
+    selectedIndex = -1;
+  }
 });
 
 mainEl.addEventListener('dblclick', e => {
   const item = e.target.closest('tr[data-path], .icon-item[data-path]');
   if (!item) return;
-  const isDir = item.dataset.isDir === 'true';
-  if (isDir) navigate(item.dataset.path.split('/'));
-  else window.open(fileUrl(item.dataset.path), '_blank');
+  openItem(item);
 });
 
-/* 工具栏 */
 navBack.addEventListener('click', goBack);
 navForward.addEventListener('click', goForward);
 navUp.addEventListener('click', goUp);
@@ -1093,6 +1510,7 @@ function setMainView(view){
     if (!dirCache) dirCache = Array.from(treeEl.querySelectorAll('details.dir'));
     applyTreeState();
     if (qInput.value) filterTreeView(qInput.value);
+    else updateTreeButtons();
   } else {
     renderExplorer();
     if (qInput.value){
@@ -1100,8 +1518,6 @@ function setMainView(view){
       renderExplorer();
     }
   }
-  // 关闭搜索的临时展开
-  if (treeVisible) applyTreeState();
 }
 
 /* ============================================================
@@ -1110,7 +1526,7 @@ function setMainView(view){
 let currentData = {nodes: [], label: ''};
 
 /* ============================================================
-   搜索（按视图分流）
+   搜索
    ============================================================ */
 const qInput = document.getElementById('q');
 let searchTimer = null;
@@ -1126,9 +1542,7 @@ function runSearch(){
     return;
   }
 
-  // explorer 视图
   if (scope === 'all' && q.trim()){
-    // 全局搜索时切到树形视图
     setMainView('tree');
     const ok = filterTreeView(q);
     emptyEl.hidden = ok;
@@ -1158,7 +1572,6 @@ document.addEventListener('keydown', e => {
    ============================================================ */
 const settingsDlg = document.getElementById('settings');
 document.getElementById('openSettings').addEventListener('click', () => {
-  // 同步当前值
   document.querySelectorAll('input[name="mainView"]').forEach(r => {
     r.checked = r.value === document.body.dataset.view;
   });
@@ -1168,7 +1581,7 @@ document.getElementById('openSettings').addEventListener('click', () => {
 });
 document.getElementById('closeSettings').addEventListener('click', () => settingsDlg.close());
 settingsDlg.addEventListener('click', e => {
-  if (e.target === settingsDlg) settingsDlg.close();  // 点遮罩关闭
+  if (e.target === settingsDlg) settingsDlg.close();
 });
 document.querySelectorAll('input[name="mainView"]').forEach(r => {
   r.addEventListener('change', () => {
@@ -1185,6 +1598,47 @@ document.getElementById('setSearchScope').addEventListener('change', e => {
 });
 
 /* ============================================================
+   资源管理器键盘导航
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if (document.body.dataset.view !== 'explorer') return;
+  if (settingsDlg.open) return;
+
+  const a = document.activeElement;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT' ||
+            a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+
+  if (e.key === 'ArrowDown'){
+    e.preventDefault();
+    const items = getItems();
+    if (!items.length) return;
+    selectItem(selectedIndex < 0 ? 0 : Math.min(selectedIndex + 1, items.length - 1));
+  } else if (e.key === 'ArrowUp'){
+    e.preventDefault();
+    const items = getItems();
+    if (!items.length) return;
+    selectItem(selectedIndex < 0 ? items.length - 1 : Math.max(selectedIndex - 1, 0));
+  } else if (e.key === 'Home'){
+    e.preventDefault();
+    selectItem(0);
+  } else if (e.key === 'End'){
+    e.preventDefault();
+    selectItem(getItems().length - 1);
+  } else if (e.key === 'Enter'){
+    if (selectedEl){
+      e.preventDefault();
+      openItem(selectedEl);
+    }
+  } else if (e.key === 'Backspace'){
+    if (expState.path.length){
+      e.preventDefault();
+      goUp();
+    }
+  }
+});
+
+/* ============================================================
    启动
    ============================================================ */
 (async function init(){
@@ -1192,15 +1646,17 @@ document.getElementById('setSearchScope').addEventListener('change', e => {
   const srcEl    = document.getElementById('src');
 
   try{
+    try{
+      linkMap = normalizeLinkMap(await loadLinkMap());
+    } catch(_){ linkMap = {}; }
+
     const {nodes, label} = await loadAll();
     sortTree(nodes);
     currentData = {nodes, label};
 
-    // --- 树形视图 ---
     treeEl.innerHTML = nodes.map(n => renderTreeNode(n, '', 0)).join('');
     applyTreeState();
 
-    // --- 资源管理器 ---
     loadExpState();
     if (!pathExists(expState.path)) expState.path = [];
     if (expState.history.length === 0){
@@ -1208,16 +1664,17 @@ document.getElementById('setSearchScope').addEventListener('change', e => {
       expState.historyIndex = 0;
     }
 
-    // --- 顶部统计 ---
     let total = 0;
     for (const n of nodes) total += countFiles(n);
-    srcEl.textContent = `${label} · ${total} 个文件`;
+    const linkCount = Object.keys(linkMap).length;
+    srcEl.textContent = `${label} · ${total} 个文件` +
+      (linkCount ? ` · ${linkCount} 个快捷方式` : '');
     srcEl.classList.add('ok');
 
-    // --- 视图 ---
     const savedView = lsGet(STORAGE.view, 'tree');
     statusEl.hidden = true;
     setMainView(savedView === 'explorer' ? 'explorer' : 'tree');
+    updateTreeButtons();
 
   } catch(err){
     srcEl.textContent = '加载失败';
@@ -1231,9 +1688,8 @@ document.getElementById('setSearchScope').addEventListener('change', e => {
   }
 })();
 
-/* 树形视图展开/收起 */
-document.getElementById('expandAll').addEventListener('click',   () => setAllTreeOpen(true));
-document.getElementById('collapseAll').addEventListener('click', () => setAllTreeOpen(false));
+expandBtn.addEventListener('click',   () => setAllTreeOpen(true));
+collapseBtn.addEventListener('click', () => setAllTreeClick(false));
 </script>
 </body>
 </html>
