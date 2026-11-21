@@ -67,65 +67,9 @@
     "type": "app",
     "target": ""
   },
-  "lnk/url/4399云游戏.url": {
+  "lnk/url/JYWYYHY.url": {
     "type": "url",
-    "target": "https://y.4399.com/"
-  },
-  "lnk/url/AV-BV号转换器.url": {
-    "type": "url",
-    "target": "https://www.bilibili.com/toy/av/"
-  },
-  "lnk/url/convert.io.url": {
-    "type": "url",
-    "target": "https://convert.io/cn/"
-  },
-  "lnk/url/CVoice 声音印象测试.url": {
-    "type": "url",
-    "target": "https://chiooone.com/cvoice/"
-  },
-  "lnk/url/EasyLRC(轻松制作同步歌词).url": {
-    "type": "url",
-    "target": "https://lrc.isea.dev/"
-  },
-  "lnk/url/FreeConvert.url": {
-    "type": "url",
-    "target": "https://www.freeconvert.com/zh"
-  },
-  "lnk/url/Hedra AI Pro.url": {
-    "type": "url",
-    "target": "https://hedra.pro/"
-  },
-  "lnk/url/Hi歌曲音乐网.url": {
-    "type": "url",
-    "target": "https://higequ.com/"
-  },
-  "lnk/url/LRC ➔ song MusicLyrics.url": {
-    "type": "url",
-    "target": "https://www.toomic.com/"
-  },
-  "lnk/url/PasswordMonster.url": {
-    "type": "url",
-    "target": "https://www.passwordmonster.com/"
-  },
-  "lnk/url/Phigros 网页版.url": {
-    "type": "url",
-    "target": "https://mihoyo.wiki/Phigros/settings/index.html"
-  },
-  "lnk/url/Phigros-谱面信息.url": {
-    "type": "url",
-    "target": "https://mzh.moegirl.org.cn/Phigros/%E8%B0%B1%E9%9D%A2%E4%BF%A1%E6%81%AF"
-  },
-  "lnk/url/PhiTogether.url": {
-    "type": "url",
-    "target": "https://phitogether.fun/#/loading"
-  },
-  "lnk/url/Rhythm Archive  音游图片下载站.url": {
-    "type": "url",
-    "target": "https://rhythmarchive.github.io/"
-  },
-  "lnk/url/Sound Effect Generator 在线音频格式转换.url": {
-    "type": "url",
-    "target": "https://soundeffectgenerator.org/zh/audio-format-converter"
+    "target": "https://github.com/JYWYYHY/"
   },
   "lnk/url/urls_out/21.最新版168-182(瞳34-35，圣章石6个）_哔哩哔哩_bilibili.url": {
     "type": "url",
@@ -139,323 +83,335 @@
     "type": "url",
     "target": "https://www.bilibili.com/video/BV18LtvzTEAy?spm_id_from=333.788.player.switch&vd_source=d5ff1f669ee41f4bdba8f92051b25552&p=2"
   },
-  "lnk/url/urls_out/收藏夹栏/4399云游戏.url": {
-    "type": "url",
-    "target": "https://y.4399.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/_param=300y300 - 搜索.url": {
-    "type": "url",
-    "target": "https://cn.bing.com/search?q=%3Fparam%3D300y300&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOagCALACAA&FORM=ANCMS9&adppc=EdgeStart&PC=U531"
-  },
-  "lnk/url/urls_out/收藏夹栏/api.vkeys.cn_v2_music_netease_lyric_id=3448017288.url": {
-    "type": "url",
-    "target": "https://api.vkeys.cn/v2/music/netease/lyric?id=3448017288"
-  },
-  "lnk/url/urls_out/收藏夹栏/CloudBase 云开发 · AI 原生后端一体化平台 _ 腾讯云开发 CloudBase - AI 原生后端一体化平台.url": {
-    "type": "url",
-    "target": "https://tcb.cloud.tencent.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Cloudflare Dashboard _ Manage Your Account.url": {
-    "type": "url",
-    "target": "https://dash.cloudflare.com/7a65ba8c9968ad567dabd12f0fa337c8/add-site?type=onboard"
-  },
-  "lnk/url/urls_out/收藏夹栏/CSS3 代码生成器 _菜鸟工具.url": {
-    "type": "url",
-    "target": "https://www.jyshare.com/front-end/10186/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Dashboard _ CORSPROXY.url": {
-    "type": "url",
-    "target": "https://console.corsproxy.io/"
-  },
-  "lnk/url/urls_out/收藏夹栏/DeepSeek Exporter - DeepSeek在线导出与对话记录备份工具.url": {
-    "type": "url",
-    "target": "https://ds.aikeyu.cn/"
-  },
-  "lnk/url/urls_out/收藏夹栏/DeepSeek.url": {
-    "type": "url",
-    "target": "https://chat.deepseek.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/DIY动图GIF字幕生成器-免费在线制作字幕动图表情包_diygif.com.url": {
-    "type": "url",
-    "target": "https://www.diygif.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Ezgif - 免费在线动画GIF编辑器.url": {
-    "type": "url",
-    "target": "https://ezgif.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Gcore _ Global Hosting, CDN, Edge and Cloud Services.url": {
-    "type": "url",
-    "target": "https://gcore.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/GitHub状态.url": {
-    "type": "url",
-    "target": "https://www.githubstatus.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/GNAME _ 批量注册域名：搜索和注册多个域名，高效且节省.url": {
-    "type": "url",
-    "target": "https://www.gname.vip/search?ym=78&hz=eu.cc"
-  },
-  "lnk/url/urls_out/收藏夹栏/HTML 教程 _ 菜鸟教程.url": {
-    "type": "url",
-    "target": "https://www.runoob.com/html/html-tutorial.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/HTML_CSS_JS 在线工具 _ 菜鸟工具.url": {
-    "type": "url",
-    "target": "https://www.jyshare.com/front-end/61/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Huang1111网盘.url": {
-    "type": "url",
-    "target": "https://pan.huang1111.cn/home?path=%2F"
-  },
-  "lnk/url/urls_out/收藏夹栏/JavaScript HTML DOM 改变 CSS _ 菜鸟教程.url": {
-    "type": "url",
-    "target": "https://www.runoob.com/js/js-htmldom-css.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/JavaScript 变量 _ 菜鸟教程.url": {
-    "type": "url",
-    "target": "https://www.runoob.com/js/js-variables.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/jsDelivr - A free, fast, and reliable CDN for JS and open source.url": {
-    "type": "url",
-    "target": "https://www.jsdelivr.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/JSDMirror - 极速、免费、全球化的前端 CDN 镜像.url": {
-    "type": "url",
-    "target": "https://cdn.jsdmirror.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/JYWYYHY.url": {
-    "type": "url",
-    "target": "https://github.com/JYWYYHY/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Microsoft Translator - 从英语翻译.url": {
-    "type": "url",
-    "target": "https://cn.bing.com/translator"
-  },
-  "lnk/url/urls_out/收藏夹栏/OpenRouter.url": {
-    "type": "url",
-    "target": "https://openrouter.ai/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Outlook.url": {
-    "type": "url",
-    "target": "https://outlook.live.com/mail/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Phigros_谱面信息 - 萌娘百科 万物皆可萌的百科全书.url": {
-    "type": "url",
-    "target": "https://mzh.moegirl.org.cn/Phigros/%E8%B0%B1%E9%9D%A2%E4%BF%A1%E6%81%AF"
-  },
-  "lnk/url/urls_out/收藏夹栏/Projects _ jywyyhy _ Netlify.url": {
-    "type": "url",
-    "target": "https://app.netlify.com/teams/jywyyhy/projects"
-  },
-  "lnk/url/urls_out/收藏夹栏/Projects _ JYWYYHY _ Supabase.url": {
-    "type": "url",
-    "target": "https://supabase.com/dashboard/org/yaaemojtwlotlmulqglg"
-  },
-  "lnk/url/urls_out/收藏夹栏/QQ邮箱.url": {
-    "type": "url",
-    "target": "https://wx.mail.qq.com/home/index?sid=zdc5cIxnRTUuVXc4AK42OQAA#/list/1"
-  },
-  "lnk/url/urls_out/收藏夹栏/Rhythm Archive _ 音游图片下载站.url": {
-    "type": "url",
-    "target": "https://rhythmarchive.github.io/"
-  },
-  "lnk/url/urls_out/收藏夹栏/Scan QR Code for Free - WebQR.url": {
-    "type": "url",
-    "target": "https://webqr.app/scan"
-  },
-  "lnk/url/urls_out/收藏夹栏/Scratch 3.0网页版在线编程 - Scratch官网.url": {
-    "type": "url",
-    "target": "https://scratchcn.pages.dev/"
-  },
-  "lnk/url/urls_out/收藏夹栏/ShowYourCode — Paste HTML, Render & Share.url": {
-    "type": "url",
-    "target": "https://www.showyourcode.app/zh"
-  },
-  "lnk/url/urls_out/收藏夹栏/W3C 标记验证服务.url": {
-    "type": "url",
-    "target": "https://validator.w3.org/"
-  },
-  "lnk/url/urls_out/收藏夹栏/XR引导页，收藏我回家不迷路！.url": {
-    "type": "url",
-    "target": "http://xrvi.top/index.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/✔ PDF编辑 - 100%免费且在线 - PDF24.url": {
-    "type": "url",
-    "target": "https://tools.pdf24.org/zh/edit-pdf#s=1788057087060"
-  },
-  "lnk/url/urls_out/收藏夹栏/【原神】游逸旅闻汇总（已更新7.1版本）.url": {
-    "type": "url",
-    "target": "https://www.bilibili.com/toy/genshin-travelers-tales"
-  },
-  "lnk/url/urls_out/收藏夹栏/【网站自荐】梗鲸：DeepSeek 蓝色大肥鱼表情包图库，台词梗图持续更新 · Issue #11800 · ruanyf_weekly.url": {
-    "type": "url",
-    "target": "https://github.com/ruanyf/weekly/issues/11800"
-  },
-  "lnk/url/urls_out/收藏夹栏/代理基础设施 - Vercel.url": {
-    "type": "url",
-    "target": "https://vercel.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/你的影月月-哔哩哔哩_bilibili.url": {
-    "type": "url",
-    "target": "https://search.bilibili.com/all?vt=78684065&keyword=%E4%BD%A0%E7%9A%84%E5%BD%B1%E6%9C%88%E6%9C%88&from_source=webtop_search&spm_id_from=333.1007&search_source=3"
-  },
-  "lnk/url/urls_out/收藏夹栏/光棱坦克工厂.url": {
-    "type": "url",
-    "target": "https://prism.uyanide.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/免费在线 GIF 工具 - 转换、压缩与制作.url": {
-    "type": "url",
-    "target": "https://gif-master.com/zh"
-  },
-  "lnk/url/urls_out/收藏夹栏/剪云舞影月华悠.url": {
-    "type": "url",
-    "target": "https://jywyyhy.github.io/"
-  },
-  "lnk/url/urls_out/收藏夹栏/剪云舞影月华悠_1.url": {
-    "type": "url",
-    "target": "https://jywyyhy.netlify.app/"
-  },
-  "lnk/url/urls_out/收藏夹栏/原神地图.url": {
-    "type": "url",
-    "target": "https://act.mihoyo.com/ys/app/interactive-map/index.html?lang=zh-cn"
-  },
-  "lnk/url/urls_out/收藏夹栏/哔哩哔哩 (゜-゜)つロ 干杯~-bilibili.url": {
-    "type": "url",
-    "target": "https://www.bilibili.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/在线去水印免费 _ AI去水印，去除水印、Logo、文字，支持图片、视频和 PDF _ Dewatermark AI.url": {
-    "type": "url",
-    "target": "https://dewatermark.ai/zh-CN"
-  },
-  "lnk/url/urls_out/收藏夹栏/地球Online官方网站（人类） — 好评如潮的大型开放世界冒险游戏.url": {
-    "type": "url",
-    "target": "https://earthonline.org.cn/"
-  },
-  "lnk/url/urls_out/收藏夹栏/宇宙无敌超级霹雳新宿决战.url": {
-    "type": "url",
-    "target": "https://www.bilibili.com/toy/3avpeuj9fIhdehr3/index.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/小众技术工具库 _ 专注分享实用软件和精品网站.url": {
-    "type": "url",
-    "target": "https://www.xiaozhongjishu.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/工作区 - Visual Studio Code.url": {
-    "type": "url",
-    "target": "https://vscode.dev/?vscode-lang=zh-cn"
-  },
-  "lnk/url/urls_out/收藏夹栏/文叔叔 - 传文件，找文叔叔（大文件、永不限速）.url": {
-    "type": "url",
-    "target": "https://www.wenshushu.cn/"
-  },
-  "lnk/url/urls_out/收藏夹栏/星光_图片混淆TOOL.url": {
-    "type": "url",
-    "target": "https://gascy37.github.io/grimenc/"
-  },
-  "lnk/url/urls_out/收藏夹栏/服务总览 - EdgeOne - 控制台.url": {
-    "type": "url",
-    "target": "https://console.tencentcloud.com/edgeone"
-  },
-  "lnk/url/urls_out/收藏夹栏/栗次元API - 举个栗子.url": {
-    "type": "url",
-    "target": "https://t.alcy.cc/"
-  },
-  "lnk/url/urls_out/收藏夹栏/桌游合集 - game.hullqin.cn.url": {
-    "type": "url",
-    "target": "https://game.hullqin.cn/"
-  },
-  "lnk/url/urls_out/收藏夹栏/梗鲸 · DeepSeek酱语录 · 蓝色大肥鱼表情包 · DeepSeek娘化拟人梗图.url": {
-    "type": "url",
-    "target": "https://ai-meme.cdqyfdbymn.me/"
-  },
-  "lnk/url/urls_out/收藏夹栏/椰羊cocogoat.url": {
-    "type": "url",
-    "target": "https://cocogoat.work/achievement"
-  },
-  "lnk/url/urls_out/收藏夹栏/歌曲宝-找歌就用歌曲宝-MP3音乐高品质在线免费下载.url": {
-    "type": "url",
-    "target": "https://www.gequbao.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/注册 - 腾讯云.url": {
-    "type": "url",
-    "target": "https://cloud.tencent.com/register"
-  },
-  "lnk/url/urls_out/收藏夹栏/洛苏API.url": {
-    "type": "url",
-    "target": "https://api.luosu.top/"
-  },
-  "lnk/url/urls_out/收藏夹栏/洛雷姆·皮克苏姆.url": {
-    "type": "url",
-    "target": "https://picsum.photos/"
-  },
-  "lnk/url/urls_out/收藏夹栏/添加用户名.url": {
-    "type": "url",
-    "target": "https://account.live.com/AddAssocId?ru=&cru=&fl="
-  },
-  "lnk/url/urls_out/收藏夹栏/游戏作品集 _ 任意门.url": {
-    "type": "url",
-    "target": "https://www.anyanygame.com/games"
-  },
-  "lnk/url/urls_out/收藏夹栏/盘友圈.url": {
-    "type": "url",
-    "target": "https://panyq.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/私传网 - Send.wang _ 免安装跨平台 P2P 文件传输.url": {
-    "type": "url",
-    "target": "https://send.wang/"
-  },
-  "lnk/url/urls_out/收藏夹栏/简单云链 EasyLink _免费文件转链接工具 二维码生成器.url": {
-    "type": "url",
-    "target": "https://easylink.cc/"
-  },
-  "lnk/url/urls_out/收藏夹栏/素颜API-免费API数据接口调用服务平台api.suyanw.cn.url": {
-    "type": "url",
-    "target": "https://api.suyanw.cn/"
-  },
-  "lnk/url/urls_out/收藏夹栏/绿软家园 - 打造绿色软件,免费软件下载基地！.url": {
-    "type": "url",
-    "target": "https://www.downgr.com/"
-  },
-  "lnk/url/urls_out/收藏夹栏/网易云游戏_网易官方云游戏平台_云电脑_云手机_免下载畅玩_cg.163.com.url": {
-    "type": "url",
-    "target": "https://cg.163.com/#/game-recommend"
-  },
-  "lnk/url/urls_out/收藏夹栏/豆包 - 字节跳动旗下 AI 智能助手.url": {
-    "type": "url",
-    "target": "https://www.doubao.com/chat/"
-  },
-  "lnk/url/urls_out/收藏夹栏/软仓 _ RuanCang.Net.url": {
-    "type": "url",
-    "target": "https://www.ruancang.net/"
-  },
-  "lnk/url/urls_out/收藏夹栏/那些年，被大众误解了的码农们 _ 菜鸟教程.url": {
-    "type": "url",
-    "target": "https://www.runoob.com/w3cnote/programmer-joke-17.html"
-  },
-  "lnk/url/urls_out/收藏夹栏/霓虹控制台.url": {
-    "type": "url",
-    "target": "https://console.neon.tech/app/projects/withered-glitter-32597182/branches/br-plain-cell-azjlbkau"
-  },
   "lnk/url/urls_out/珠星大厦(1) 共14个(1-14)无名尘灵1-7 乐园纪念币435_哔哩哔哩_bilibili.url": {
     "type": "url",
     "target": "https://www.bilibili.com/video/BV19kcEz8E4r?spm_id_from=333.788.videopod.episodes&p=16"
   },
-  "lnk/url/大狗大狗叫叫叫.url": {
+  "lnk/url/XR引导页，收藏我回家不迷路！.url": {
     "type": "url",
-    "target": "https://www.bilibili.com/toy/Dagou-Tap/index.html"
+    "target": "http://xrvi.top/index.html"
   },
-  "lnk/url/林泊百科Limbo Wiki.url": {
+  "lnk/url/地球Online官方网站（人类） — 好评如潮的大型开放世界冒险游戏.url": {
     "type": "url",
-    "target": "https://wiki.pigeon-games.com/index.php?title=%E9%A6%96%E9%A1%B5"
+    "target": "https://earthonline.org.cn/"
   },
-  "lnk/url/歌词转换工具.url": {
+  "lnk/url/实用工具/办公效率/Microsoft Translator - 从英语翻译.url": {
     "type": "url",
-    "target": "https://lrc.64h.cn/"
+    "target": "https://cn.bing.com/translator"
   },
-  "lnk/url/简单云链 EasyLink 免费文件转链接工具 二维码生成器.url": {
+  "lnk/url/实用工具/办公效率/PasswordMonster - 密码强度计量表.url": {
+    "type": "url",
+    "target": "https://www.passwordmonster.com/"
+  },
+  "lnk/url/实用工具/办公效率/Scan QR Code for Free - WebQR.url": {
+    "type": "url",
+    "target": "https://webqr.app/scan"
+  },
+  "lnk/url/实用工具/图片动图处理/Dewatermark AI 图片去水印.url": {
+    "type": "url",
+    "target": "https://dewatermark.ai/zh-CN"
+  },
+  "lnk/url/实用工具/图片动图处理/DIY动图GIF字幕生成器-免费在线制作字幕动图表情包_diygif.com.url": {
+    "type": "url",
+    "target": "https://www.diygif.com/"
+  },
+  "lnk/url/实用工具/图片动图处理/Ezgif - 免费在线动画GIF编辑器.url": {
+    "type": "url",
+    "target": "https://ezgif.com/"
+  },
+  "lnk/url/实用工具/图片动图处理/GIF Master 在线 GIF 工具.url": {
+    "type": "url",
+    "target": "https://gif-master.com/zh"
+  },
+  "lnk/url/实用工具/图片动图处理/光棱坦克工厂.url": {
+    "type": "url",
+    "target": "https://prism.uyanide.com/"
+  },
+  "lnk/url/实用工具/图片动图处理/星光_图片混淆TOOL.url": {
+    "type": "url",
+    "target": "https://gascy37.github.io/grimenc/"
+  },
+  "lnk/url/实用工具/文件传输存储/Huang1111网盘.url": {
+    "type": "url",
+    "target": "https://pan.huang1111.cn/home?path=%2F"
+  },
+  "lnk/url/实用工具/文件传输存储/文叔叔 - 传文件，找文叔叔（大文件、永不限速）.url": {
+    "type": "url",
+    "target": "https://www.wenshushu.cn/"
+  },
+  "lnk/url/实用工具/文件传输存储/私传网 - Send.wang _ 免安装跨平台 P2P 文件传输.url": {
+    "type": "url",
+    "target": "https://send.wang/"
+  },
+  "lnk/url/实用工具/文件传输存储/简单云链 EasyLink _免费文件转链接工具 二维码生成器.url": {
     "type": "url",
     "target": "https://easylink.cc/"
   },
-  "lnk/url/音乐解锁.url": {
+  "lnk/url/实用工具/格式转换/convert.io - 文件转换器.url": {
+    "type": "url",
+    "target": "https://convert.io/cn/"
+  },
+  "lnk/url/实用工具/格式转换/FreeConvert.url": {
+    "type": "url",
+    "target": "https://www.freeconvert.com/zh"
+  },
+  "lnk/url/实用工具/格式转换/Sound Effect Generator 在线音频格式转换.url": {
+    "type": "url",
+    "target": "https://soundeffectgenerator.org/zh/audio-format-converter"
+  },
+  "lnk/url/实用工具/格式转换/✔ PDF编辑 - 100%免费且在线 - PDF24.url": {
+    "type": "url",
+    "target": "https://tools.pdf24.org/zh/edit-pdf#s=1788057087060"
+  },
+  "lnk/url/实用工具/趣味小工具/AV-BV号转换器.url": {
+    "type": "url",
+    "target": "https://www.bilibili.com/toy/av/"
+  },
+  "lnk/url/实用工具/趣味小工具/CVoice 声音印象测试.url": {
+    "type": "url",
+    "target": "https://chiooone.com/cvoice/"
+  },
+  "lnk/url/开发技术/AI与大模型/DeepSeek.url": {
+    "type": "url",
+    "target": "https://chat.deepseek.com/"
+  },
+  "lnk/url/开发技术/AI与大模型/OpenRouter.url": {
+    "type": "url",
+    "target": "https://openrouter.ai/"
+  },
+  "lnk/url/开发技术/AI与大模型/豆包 - 字节跳动旗下 AI 智能助手.url": {
+    "type": "url",
+    "target": "https://www.doubao.com/chat/"
+  },
+  "lnk/url/开发技术/个人项目/剪云舞影月华悠.url": {
+    "type": "url",
+    "target": "https://jywyyhy.github.io/"
+  },
+  "lnk/url/开发技术/云服务与部署/Cloudflare Dashboard.url": {
+    "type": "url",
+    "target": "https://dash.cloudflare.com/7a65ba8c9968ad567dabd12f0fa337c8/add-site?type=onboard"
+  },
+  "lnk/url/开发技术/云服务与部署/Dashboard _ CORSPROXY.url": {
+    "type": "url",
+    "target": "https://console.corsproxy.io/"
+  },
+  "lnk/url/开发技术/云服务与部署/Gcore 云服务.url": {
+    "type": "url",
+    "target": "https://gcore.com/"
+  },
+  "lnk/url/开发技术/云服务与部署/GNAME _ 批量注册域名：搜索和注册多个域名，高效且节省.url": {
+    "type": "url",
+    "target": "https://www.gname.vip/search?ym=78&hz=eu.cc"
+  },
+  "lnk/url/开发技术/云服务与部署/Projects _ jywyyhy _ Netlify.url": {
+    "type": "url",
+    "target": "https://app.netlify.com/teams/jywyyhy/projects"
+  },
+  "lnk/url/开发技术/云服务与部署/Projects _ JYWYYHY _ Supabase.url": {
+    "type": "url",
+    "target": "https://supabase.com/dashboard/org/yaaemojtwlotlmulqglg"
+  },
+  "lnk/url/开发技术/云服务与部署/代理基础设施 - Vercel.url": {
+    "type": "url",
+    "target": "https://vercel.com/"
+  },
+  "lnk/url/开发技术/云服务与部署/服务总览 - EdgeOne - 控制台.url": {
+    "type": "url",
+    "target": "https://console.tencentcloud.com/edgeone"
+  },
+  "lnk/url/开发技术/云服务与部署/腾讯云 CloudBase 云开发.url": {
+    "type": "url",
+    "target": "https://tcb.cloud.tencent.com/"
+  },
+  "lnk/url/开发技术/云服务与部署/霓虹控制台.url": {
+    "type": "url",
+    "target": "https://console.neon.tech/app/projects/withered-glitter-32597182/branches/br-plain-cell-azjlbkau"
+  },
+  "lnk/url/开发技术/代码工具/GitHub状态.url": {
+    "type": "url",
+    "target": "https://www.githubstatus.com/"
+  },
+  "lnk/url/开发技术/代码工具/工作区 - Visual Studio Code.url": {
+    "type": "url",
+    "target": "https://vscode.dev/?vscode-lang=zh-cn"
+  },
+  "lnk/url/开发技术/前端开发/CSS3 代码生成器 _菜鸟工具.url": {
+    "type": "url",
+    "target": "https://www.jyshare.com/front-end/10186/"
+  },
+  "lnk/url/开发技术/前端开发/HTML 教程 _ 菜鸟教程.url": {
+    "type": "url",
+    "target": "https://www.runoob.com/html/html-tutorial.html"
+  },
+  "lnk/url/开发技术/前端开发/HTML_CSS_JS 在线工具 _ 菜鸟工具.url": {
+    "type": "url",
+    "target": "https://www.jyshare.com/front-end/61/"
+  },
+  "lnk/url/开发技术/前端开发/JavaScript HTML DOM 改变 CSS _ 菜鸟教程.url": {
+    "type": "url",
+    "target": "https://www.runoob.com/js/js-htmldom-css.html"
+  },
+  "lnk/url/开发技术/前端开发/JavaScript 变量 _ 菜鸟教程.url": {
+    "type": "url",
+    "target": "https://www.runoob.com/js/js-variables.html"
+  },
+  "lnk/url/开发技术/前端开发/jsDelivr - A free, fast, and reliable CDN for JS and open source.url": {
+    "type": "url",
+    "target": "https://www.jsdelivr.com/"
+  },
+  "lnk/url/开发技术/前端开发/JSDMirror - 极速、免费、全球化的前端 CDN 镜像.url": {
+    "type": "url",
+    "target": "https://cdn.jsdmirror.com/"
+  },
+  "lnk/url/开发技术/前端开发/Scratch 3.0网页版在线编程 - Scratch官网.url": {
+    "type": "url",
+    "target": "https://scratchcn.pages.dev/"
+  },
+  "lnk/url/开发技术/前端开发/ShowYourCode — Paste HTML, Render & Share.url": {
+    "type": "url",
+    "target": "https://www.showyourcode.app/zh"
+  },
+  "lnk/url/开发技术/前端开发/W3C 标记验证服务.url": {
+    "type": "url",
+    "target": "https://validator.w3.org/"
+  },
+  "lnk/url/开发技术/前端开发/洛雷姆·皮克苏姆.url": {
+    "type": "url",
+    "target": "https://picsum.photos/"
+  },
+  "lnk/url/待整理归档/_param=300y300 - 搜索.url": {
+    "type": "url",
+    "target": "https://cn.bing.com/search?q=%3Fparam%3D300y300&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOagCALACAA&FORM=ANCMS9&adppc=EdgeStart&PC=U531"
+  },
+  "lnk/url/日常常用/哔哩哔哩 (゜-゜)つロ 干杯~-bilibili.url": {
+    "type": "url",
+    "target": "https://www.bilibili.com/"
+  },
+  "lnk/url/日常常用/通讯邮箱/Outlook.url": {
+    "type": "url",
+    "target": "https://outlook.live.com/mail/"
+  },
+  "lnk/url/日常常用/通讯邮箱/QQ邮箱.url": {
+    "type": "url",
+    "target": "https://wx.mail.qq.com/home/index?sid=zdc5cIxnRTUuVXc4AK42OQAA#/list/1"
+  },
+  "lnk/url/游戏娱乐/Phigros专区/Phigros 网页版.url": {
+    "type": "url",
+    "target": "https://mihoyo.wiki/Phigros/settings/index.html"
+  },
+  "lnk/url/游戏娱乐/Phigros专区/Phigros_谱面信息 - 萌娘百科 万物皆可萌的百科全书.url": {
+    "type": "url",
+    "target": "https://mzh.moegirl.org.cn/Phigros/%E8%B0%B1%E9%9D%A2%E4%BF%A1%E6%81%AF"
+  },
+  "lnk/url/游戏娱乐/Phigros专区/PhiTogether.url": {
+    "type": "url",
+    "target": "https://phitogether.fun/#/loading"
+  },
+  "lnk/url/游戏娱乐/Phigros专区/Rhythm Archive _ 音游图片下载站.url": {
+    "type": "url",
+    "target": "https://rhythmarchive.github.io/"
+  },
+  "lnk/url/游戏娱乐/Phigros专区/林泊百科Limbo Wiki.url": {
+    "type": "url",
+    "target": "https://wiki.pigeon-games.com/index.php?title=%E9%A6%96%E9%A1%B5"
+  },
+  "lnk/url/游戏娱乐/云游戏/4399云游戏.url": {
+    "type": "url",
+    "target": "https://y.4399.com/"
+  },
+  "lnk/url/游戏娱乐/云游戏/网易云游戏_网易官方云游戏平台_云电脑_云手机_免下载畅玩_cg.163.com.url": {
+    "type": "url",
+    "target": "https://cg.163.com/#/game-recommend"
+  },
+  "lnk/url/游戏娱乐/原神专区/【原神】游逸旅闻汇总（已更新7.1版本）.url": {
+    "type": "url",
+    "target": "https://www.bilibili.com/toy/genshin-travelers-tales"
+  },
+  "lnk/url/游戏娱乐/原神专区/你的影月月-哔哩哔哩_bilibili.url": {
+    "type": "url",
+    "target": "https://search.bilibili.com/all?vt=78684065&keyword=%E4%BD%A0%E7%9A%84%E5%BD%B1%E6%9C%88%E6%9C%88&from_source=webtop_search&spm_id_from=333.1007&search_source=3"
+  },
+  "lnk/url/游戏娱乐/原神专区/原神地图.url": {
+    "type": "url",
+    "target": "https://act.mihoyo.com/ys/app/interactive-map/index.html?lang=zh-cn"
+  },
+  "lnk/url/游戏娱乐/原神专区/椰羊cocogoat.url": {
+    "type": "url",
+    "target": "https://cocogoat.work/achievement"
+  },
+  "lnk/url/游戏娱乐/小游戏/大狗大狗叫叫叫.url": {
+    "type": "url",
+    "target": "https://www.bilibili.com/toy/Dagou-Tap/index.html"
+  },
+  "lnk/url/游戏娱乐/小游戏/宇宙无敌超级霹雳新宿决战.url": {
+    "type": "url",
+    "target": "https://www.bilibili.com/toy/3avpeuj9fIhdehr3/index.html"
+  },
+  "lnk/url/游戏娱乐/小游戏/游戏作品集 _ 任意门.url": {
+    "type": "url",
+    "target": "https://www.anyanygame.com/games"
+  },
+  "lnk/url/游戏娱乐/桌游合集 - game.hullqin.cn.url": {
+    "type": "url",
+    "target": "https://game.hullqin.cn/"
+  },
+  "lnk/url/资源导航/免费API接口/api.vkeys.cn_v2_music_netease_lyric_id=3448017288.url": {
+    "type": "url",
+    "target": "https://api.vkeys.cn/v2/music/netease/lyric?id=3448017288"
+  },
+  "lnk/url/资源导航/免费API接口/栗次元API - 举个栗子.url": {
+    "type": "url",
+    "target": "https://t.alcy.cc/"
+  },
+  "lnk/url/资源导航/免费API接口/洛苏API.url": {
+    "type": "url",
+    "target": "https://api.luosu.top/"
+  },
+  "lnk/url/资源导航/免费API接口/素颜API-免费API数据接口调用服务平台api.suyanw.cn.url": {
+    "type": "url",
+    "target": "https://api.suyanw.cn/"
+  },
+  "lnk/url/资源导航/梗鲸 · DeepSeek酱语录 · 蓝色大肥鱼表情包 · DeepSeek娘化拟人梗图.url": {
+    "type": "url",
+    "target": "https://ai-meme.cdqyfdbymn.me/"
+  },
+  "lnk/url/资源导航/盘友圈.url": {
+    "type": "url",
+    "target": "https://panyq.com/"
+  },
+  "lnk/url/资源导航/蓝色大肥鱼（大肥鱼）— DeepSeek娘表情包与 AI 娘二创图库.url": {
+    "type": "url",
+    "target": "https://xn--pssy23gqgbz2d718b.com/"
+  },
+  "lnk/url/资源导航/软件资源站/小众技术工具库 _ 专注分享实用软件和精品网站.url": {
+    "type": "url",
+    "target": "https://www.xiaozhongjishu.com/"
+  },
+  "lnk/url/资源导航/软件资源站/绿软家园 - 打造绿色软件,免费软件下载基地！.url": {
+    "type": "url",
+    "target": "https://www.downgr.com/"
+  },
+  "lnk/url/资源导航/软件资源站/软仓 _ RuanCang.Net.url": {
+    "type": "url",
+    "target": "https://www.ruancang.net/"
+  },
+  "lnk/url/音乐相关/EasyLRC(轻松制作同步歌词).url": {
+    "type": "url",
+    "target": "https://lrc.isea.dev/"
+  },
+  "lnk/url/音乐相关/Hi歌曲音乐网.url": {
+    "type": "url",
+    "target": "https://higequ.com/"
+  },
+  "lnk/url/音乐相关/歌曲宝-找歌就用歌曲宝-MP3音乐高品质在线免费下载.url": {
+    "type": "url",
+    "target": "https://www.gequbao.com/"
+  },
+  "lnk/url/音乐相关/歌词转换工具.url": {
+    "type": "url",
+    "target": "https://lrc.64h.cn/"
+  },
+  "lnk/url/音乐相关/音乐解锁.url": {
     "type": "url",
     "target": "https://m.starkettle.com/"
   },

@@ -10,233 +10,6 @@
        "name": "urls_out",
        "children": [
         {
-         "name": "收藏夹栏",
-         "children": [
-          {
-           "name": "4399云游戏.url"
-          },
-          {
-           "name": "_param=300y300 - 搜索.url"
-          },
-          {
-           "name": "api.vkeys.cn_v2_music_netease_lyric_id=3448017288.url"
-          },
-          {
-           "name": "CloudBase 云开发 · AI 原生后端一体化平台 _ 腾讯云开发 CloudBase - AI 原生后端一体化平台.url"
-          },
-          {
-           "name": "Cloudflare Dashboard _ Manage Your Account.url"
-          },
-          {
-           "name": "CSS3 代码生成器 _菜鸟工具.url"
-          },
-          {
-           "name": "Dashboard _ CORSPROXY.url"
-          },
-          {
-           "name": "DeepSeek Exporter - DeepSeek在线导出与对话记录备份工具.url"
-          },
-          {
-           "name": "DeepSeek.url"
-          },
-          {
-           "name": "DIY动图GIF字幕生成器-免费在线制作字幕动图表情包_diygif.com.url"
-          },
-          {
-           "name": "Ezgif - 免费在线动画GIF编辑器.url"
-          },
-          {
-           "name": "Gcore _ Global Hosting, CDN, Edge and Cloud Services.url"
-          },
-          {
-           "name": "GitHub状态.url"
-          },
-          {
-           "name": "GNAME _ 批量注册域名：搜索和注册多个域名，高效且节省.url"
-          },
-          {
-           "name": "HTML 教程 _ 菜鸟教程.url"
-          },
-          {
-           "name": "HTML_CSS_JS 在线工具 _ 菜鸟工具.url"
-          },
-          {
-           "name": "Huang1111网盘.url"
-          },
-          {
-           "name": "JavaScript HTML DOM 改变 CSS _ 菜鸟教程.url"
-          },
-          {
-           "name": "JavaScript 变量 _ 菜鸟教程.url"
-          },
-          {
-           "name": "jsDelivr - A free, fast, and reliable CDN for JS and open source.url"
-          },
-          {
-           "name": "JSDMirror - 极速、免费、全球化的前端 CDN 镜像.url"
-          },
-          {
-           "name": "JYWYYHY.url"
-          },
-          {
-           "name": "Microsoft Translator - 从英语翻译.url"
-          },
-          {
-           "name": "OpenRouter.url"
-          },
-          {
-           "name": "Outlook.url"
-          },
-          {
-           "name": "Phigros_谱面信息 - 萌娘百科 万物皆可萌的百科全书.url"
-          },
-          {
-           "name": "Projects _ jywyyhy _ Netlify.url"
-          },
-          {
-           "name": "Projects _ JYWYYHY _ Supabase.url"
-          },
-          {
-           "name": "QQ邮箱.url"
-          },
-          {
-           "name": "Rhythm Archive _ 音游图片下载站.url"
-          },
-          {
-           "name": "Scan QR Code for Free - WebQR.url"
-          },
-          {
-           "name": "Scratch 3.0网页版在线编程 - Scratch官网.url"
-          },
-          {
-           "name": "ShowYourCode — Paste HTML, Render & Share.url"
-          },
-          {
-           "name": "W3C 标记验证服务.url"
-          },
-          {
-           "name": "XR引导页，收藏我回家不迷路！.url"
-          },
-          {
-           "name": "✔ PDF编辑 - 100%免费且在线 - PDF24.url"
-          },
-          {
-           "name": "【原神】游逸旅闻汇总（已更新7.1版本）.url"
-          },
-          {
-           "name": "【网站自荐】梗鲸：DeepSeek 蓝色大肥鱼表情包图库，台词梗图持续更新 · Issue #11800 · ruanyf_weekly.url"
-          },
-          {
-           "name": "代理基础设施 - Vercel.url"
-          },
-          {
-           "name": "你的影月月-哔哩哔哩_bilibili.url"
-          },
-          {
-           "name": "光棱坦克工厂.url"
-          },
-          {
-           "name": "免费在线 GIF 工具 - 转换、压缩与制作.url"
-          },
-          {
-           "name": "剪云舞影月华悠.url"
-          },
-          {
-           "name": "剪云舞影月华悠_1.url"
-          },
-          {
-           "name": "原神地图.url"
-          },
-          {
-           "name": "哔哩哔哩 (゜-゜)つロ 干杯~-bilibili.url"
-          },
-          {
-           "name": "在线去水印免费 _ AI去水印，去除水印、Logo、文字，支持图片、视频和 PDF _ Dewatermark AI.url"
-          },
-          {
-           "name": "地球Online官方网站（人类） — 好评如潮的大型开放世界冒险游戏.url"
-          },
-          {
-           "name": "宇宙无敌超级霹雳新宿决战.url"
-          },
-          {
-           "name": "小众技术工具库 _ 专注分享实用软件和精品网站.url"
-          },
-          {
-           "name": "工作区 - Visual Studio Code.url"
-          },
-          {
-           "name": "文叔叔 - 传文件，找文叔叔（大文件、永不限速）.url"
-          },
-          {
-           "name": "星光_图片混淆TOOL.url"
-          },
-          {
-           "name": "服务总览 - EdgeOne - 控制台.url"
-          },
-          {
-           "name": "栗次元API - 举个栗子.url"
-          },
-          {
-           "name": "桌游合集 - game.hullqin.cn.url"
-          },
-          {
-           "name": "梗鲸 · DeepSeek酱语录 · 蓝色大肥鱼表情包 · DeepSeek娘化拟人梗图.url"
-          },
-          {
-           "name": "椰羊cocogoat.url"
-          },
-          {
-           "name": "歌曲宝-找歌就用歌曲宝-MP3音乐高品质在线免费下载.url"
-          },
-          {
-           "name": "注册 - 腾讯云.url"
-          },
-          {
-           "name": "洛苏API.url"
-          },
-          {
-           "name": "洛雷姆·皮克苏姆.url"
-          },
-          {
-           "name": "添加用户名.url"
-          },
-          {
-           "name": "游戏作品集 _ 任意门.url"
-          },
-          {
-           "name": "盘友圈.url"
-          },
-          {
-           "name": "私传网 - Send.wang _ 免安装跨平台 P2P 文件传输.url"
-          },
-          {
-           "name": "简单云链 EasyLink _免费文件转链接工具 二维码生成器.url"
-          },
-          {
-           "name": "素颜API-免费API数据接口调用服务平台api.suyanw.cn.url"
-          },
-          {
-           "name": "绿软家园 - 打造绿色软件,免费软件下载基地！.url"
-          },
-          {
-           "name": "网易云游戏_网易官方云游戏平台_云电脑_云手机_免下载畅玩_cg.163.com.url"
-          },
-          {
-           "name": "豆包 - 字节跳动旗下 AI 智能助手.url"
-          },
-          {
-           "name": "软仓 _ RuanCang.Net.url"
-          },
-          {
-           "name": "那些年，被大众误解了的码农们 _ 菜鸟教程.url"
-          },
-          {
-           "name": "霓虹控制台.url"
-          }
-         ]
-        },
-        {
          "name": "21.最新版168-182(瞳34-35，圣章石6个）_哔哩哔哩_bilibili.url"
         },
         {
@@ -251,64 +24,393 @@
        ]
       },
       {
-       "name": "4399云游戏.url"
+       "name": "实用工具",
+       "children": [
+        {
+         "name": "办公效率",
+         "children": [
+          {
+           "name": "Microsoft Translator - 从英语翻译.url"
+          },
+          {
+           "name": "PasswordMonster - 密码强度计量表.url"
+          },
+          {
+           "name": "Scan QR Code for Free - WebQR.url"
+          }
+         ]
+        },
+        {
+         "name": "图片动图处理",
+         "children": [
+          {
+           "name": "Dewatermark AI 图片去水印.url"
+          },
+          {
+           "name": "DIY动图GIF字幕生成器-免费在线制作字幕动图表情包_diygif.com.url"
+          },
+          {
+           "name": "Ezgif - 免费在线动画GIF编辑器.url"
+          },
+          {
+           "name": "GIF Master 在线 GIF 工具.url"
+          },
+          {
+           "name": "光棱坦克工厂.url"
+          },
+          {
+           "name": "星光_图片混淆TOOL.url"
+          }
+         ]
+        },
+        {
+         "name": "文件传输存储",
+         "children": [
+          {
+           "name": "Huang1111网盘.url"
+          },
+          {
+           "name": "文叔叔 - 传文件，找文叔叔（大文件、永不限速）.url"
+          },
+          {
+           "name": "私传网 - Send.wang _ 免安装跨平台 P2P 文件传输.url"
+          },
+          {
+           "name": "简单云链 EasyLink _免费文件转链接工具 二维码生成器.url"
+          }
+         ]
+        },
+        {
+         "name": "格式转换",
+         "children": [
+          {
+           "name": "convert.io - 文件转换器.url"
+          },
+          {
+           "name": "FreeConvert.url"
+          },
+          {
+           "name": "Sound Effect Generator 在线音频格式转换.url"
+          },
+          {
+           "name": "✔ PDF编辑 - 100%免费且在线 - PDF24.url"
+          }
+         ]
+        },
+        {
+         "name": "趣味小工具",
+         "children": [
+          {
+           "name": "AV-BV号转换器.url"
+          },
+          {
+           "name": "CVoice 声音印象测试.url"
+          }
+         ]
+        }
+       ]
       },
       {
-       "name": "AV-BV号转换器.url"
+       "name": "开发技术",
+       "children": [
+        {
+         "name": "AI与大模型",
+         "children": [
+          {
+           "name": "DeepSeek.url"
+          },
+          {
+           "name": "OpenRouter.url"
+          },
+          {
+           "name": "豆包 - 字节跳动旗下 AI 智能助手.url"
+          }
+         ]
+        },
+        {
+         "name": "个人项目",
+         "children": [
+          {
+           "name": "剪云舞影月华悠.url"
+          }
+         ]
+        },
+        {
+         "name": "云服务与部署",
+         "children": [
+          {
+           "name": "Cloudflare Dashboard.url"
+          },
+          {
+           "name": "Dashboard _ CORSPROXY.url"
+          },
+          {
+           "name": "Gcore 云服务.url"
+          },
+          {
+           "name": "GNAME _ 批量注册域名：搜索和注册多个域名，高效且节省.url"
+          },
+          {
+           "name": "Projects _ jywyyhy _ Netlify.url"
+          },
+          {
+           "name": "Projects _ JYWYYHY _ Supabase.url"
+          },
+          {
+           "name": "代理基础设施 - Vercel.url"
+          },
+          {
+           "name": "服务总览 - EdgeOne - 控制台.url"
+          },
+          {
+           "name": "腾讯云 CloudBase 云开发.url"
+          },
+          {
+           "name": "霓虹控制台.url"
+          }
+         ]
+        },
+        {
+         "name": "代码工具",
+         "children": [
+          {
+           "name": "GitHub状态.url"
+          },
+          {
+           "name": "工作区 - Visual Studio Code.url"
+          }
+         ]
+        },
+        {
+         "name": "前端开发",
+         "children": [
+          {
+           "name": "CSS3 代码生成器 _菜鸟工具.url"
+          },
+          {
+           "name": "HTML 教程 _ 菜鸟教程.url"
+          },
+          {
+           "name": "HTML_CSS_JS 在线工具 _ 菜鸟工具.url"
+          },
+          {
+           "name": "JavaScript HTML DOM 改变 CSS _ 菜鸟教程.url"
+          },
+          {
+           "name": "JavaScript 变量 _ 菜鸟教程.url"
+          },
+          {
+           "name": "jsDelivr - A free, fast, and reliable CDN for JS and open source.url"
+          },
+          {
+           "name": "JSDMirror - 极速、免费、全球化的前端 CDN 镜像.url"
+          },
+          {
+           "name": "Scratch 3.0网页版在线编程 - Scratch官网.url"
+          },
+          {
+           "name": "ShowYourCode — Paste HTML, Render & Share.url"
+          },
+          {
+           "name": "W3C 标记验证服务.url"
+          },
+          {
+           "name": "洛雷姆·皮克苏姆.url"
+          }
+         ]
+        }
+       ]
       },
       {
-       "name": "convert.io.url"
+       "name": "待整理归档",
+       "children": [
+        {
+         "name": "_param=300y300 - 搜索.url"
+        }
+       ]
       },
       {
-       "name": "CVoice 声音印象测试.url"
+       "name": "日常常用",
+       "children": [
+        {
+         "name": "通讯邮箱",
+         "children": [
+          {
+           "name": "Outlook.url"
+          },
+          {
+           "name": "QQ邮箱.url"
+          }
+         ]
+        },
+        {
+         "name": "高频站点",
+         "children": []
+        },
+        {
+         "name": "哔哩哔哩 (゜-゜)つロ 干杯~-bilibili.url"
+        }
+       ]
       },
       {
-       "name": "EasyLRC(轻松制作同步歌词).url"
+       "name": "游戏娱乐",
+       "children": [
+        {
+         "name": "Phigros专区",
+         "children": [
+          {
+           "name": "Phigros 网页版.url"
+          },
+          {
+           "name": "Phigros_谱面信息 - 萌娘百科 万物皆可萌的百科全书.url"
+          },
+          {
+           "name": "PhiTogether.url"
+          },
+          {
+           "name": "Rhythm Archive _ 音游图片下载站.url"
+          },
+          {
+           "name": "林泊百科Limbo Wiki.url"
+          }
+         ]
+        },
+        {
+         "name": "云游戏",
+         "children": [
+          {
+           "name": "4399云游戏.url"
+          },
+          {
+           "name": "网易云游戏_网易官方云游戏平台_云电脑_云手机_免下载畅玩_cg.163.com.url"
+          }
+         ]
+        },
+        {
+         "name": "原神专区",
+         "children": [
+          {
+           "name": "【原神】游逸旅闻汇总（已更新7.1版本）.url"
+          },
+          {
+           "name": "你的影月月-哔哩哔哩_bilibili.url"
+          },
+          {
+           "name": "原神地图.url"
+          },
+          {
+           "name": "椰羊cocogoat.url"
+          }
+         ]
+        },
+        {
+         "name": "小游戏",
+         "children": [
+          {
+           "name": "大狗大狗叫叫叫.url"
+          },
+          {
+           "name": "宇宙无敌超级霹雳新宿决战.url"
+          },
+          {
+           "name": "游戏作品集 _ 任意门.url"
+          }
+         ]
+        },
+        {
+         "name": "视频内容",
+         "children": []
+        },
+        {
+         "name": "桌游合集 - game.hullqin.cn.url"
+        }
+       ]
       },
       {
-       "name": "FreeConvert.url"
+       "name": "资源导航",
+       "children": [
+        {
+         "name": "免费API接口",
+         "children": [
+          {
+           "name": "api.vkeys.cn_v2_music_netease_lyric_id=3448017288.url"
+          },
+          {
+           "name": "栗次元API - 举个栗子.url"
+          },
+          {
+           "name": "洛苏API.url"
+          },
+          {
+           "name": "素颜API-免费API数据接口调用服务平台api.suyanw.cn.url"
+          }
+         ]
+        },
+        {
+         "name": "软件资源站",
+         "children": [
+          {
+           "name": "小众技术工具库 _ 专注分享实用软件和精品网站.url"
+          },
+          {
+           "name": "绿软家园 - 打造绿色软件,免费软件下载基地！.url"
+          },
+          {
+           "name": "软仓 _ RuanCang.Net.url"
+          }
+         ]
+        },
+        {
+         "name": "梗鲸 · DeepSeek酱语录 · 蓝色大肥鱼表情包 · DeepSeek娘化拟人梗图.url"
+        },
+        {
+         "name": "盘友圈.url"
+        },
+        {
+         "name": "蓝色大肥鱼（大肥鱼）— DeepSeek娘表情包与 AI 娘二创图库.url"
+        }
+       ]
       },
       {
-       "name": "Hedra AI Pro.url"
+       "name": "音乐相关",
+       "children": [
+        {
+         "name": "歌词制作工具",
+         "children": []
+        },
+        {
+         "name": "音乐API",
+         "children": []
+        },
+        {
+         "name": "音乐站点工具",
+         "children": []
+        },
+        {
+         "name": "EasyLRC(轻松制作同步歌词).url"
+        },
+        {
+         "name": "Hi歌曲音乐网.url"
+        },
+        {
+         "name": "歌曲宝-找歌就用歌曲宝-MP3音乐高品质在线免费下载.url"
+        },
+        {
+         "name": "歌词转换工具.url"
+        },
+        {
+         "name": "音乐解锁.url"
+        }
+       ]
       },
       {
-       "name": "Hi歌曲音乐网.url"
+       "name": "JYWYYHY.url"
       },
       {
-       "name": "LRC ➔ song MusicLyrics.url"
+       "name": "XR引导页，收藏我回家不迷路！.url"
       },
       {
-       "name": "PasswordMonster.url"
-      },
-      {
-       "name": "Phigros 网页版.url"
-      },
-      {
-       "name": "Phigros-谱面信息.url"
-      },
-      {
-       "name": "PhiTogether.url"
-      },
-      {
-       "name": "Rhythm Archive  音游图片下载站.url"
-      },
-      {
-       "name": "Sound Effect Generator 在线音频格式转换.url"
-      },
-      {
-       "name": "大狗大狗叫叫叫.url"
-      },
-      {
-       "name": "林泊百科Limbo Wiki.url"
-      },
-      {
-       "name": "歌词转换工具.url"
-      },
-      {
-       "name": "简单云链 EasyLink 免费文件转链接工具 二维码生成器.url"
-      },
-      {
-       "name": "音乐解锁.url"
+       "name": "地球Online官方网站（人类） — 好评如潮的大型开放世界冒险游戏.url"
       }
      ]
     },
@@ -842,9 +944,6 @@
      "name": "cmdysj.ttf"
     },
     {
-     "name": "favorites_2026_9_24.html"
-    },
-    {
      "name": "HoYo-Glyphs-20250529.zip"
     },
     {
@@ -870,6 +969,9 @@
     },
     {
      "name": "兄弟的故事.pptx"
+    },
+    {
+     "name": "标签编辑器.html"
     },
     {
      "name": "椰羊成就.uiafext.20260409130021.json"
@@ -3166,9 +3268,6 @@
        "name": "AE96854CA52F95611EBA6ED7BCE29B72.webp"
       },
       {
-       "name": "code-wallpaper-15.webp"
-      },
-      {
        "name": "eea52d8ea86aff7a59204e063491bf43_6150994274542359599.webp"
       },
       {
@@ -3242,6 +3341,9 @@
       },
       {
        "name": "新月之章.webp"
+      },
+      {
+       "name": "源代码！！！.webp"
       },
       {
        "name": "胡桃 (3).webp"

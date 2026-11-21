@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MP3 标签编辑器 · 本地修改歌曲元数据</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --card: #1e2128;
+    --card-2: #262a33;
+    --border: #343945;
+    --text: #e8eaf0;
+    --muted: #9aa0ad;
+    --accent: #f5a623;
+    --accent-2: #ffc65c;
+    --danger: #e06c5f;
+    --ok: #58b368;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    min-height: 100vh;
+    padding: 28px 18px 60px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header h1 { font-size: 24px; letter-spacing: .5px; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 14px; line-height: 1.7; }
+  .badge {
+    display: inline-block; background: var(--card-2); border: 1px solid var(--border);
+    color: var(--accent-2); border-radius: 999px; padding: 2px 10px; font-size: 12px; margin-right: 6px;
+  }
+
+  /* ===== 拖放区 ===== */
+  #dropzone {
+    margin-top: 22px; border: 2px dashed var(--border); border-radius: 16px;
+    background: var(--card); padding: 42px 22px; text-align: center; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  #dropzone:hover, #dropzone.dragover { border-color: var(--accent); background: #23262e; }
+  #dropzone .icon { font-size: 38px; }
+  #dropzone h2 { margin-top: 12px; font-size: 17px; font-weight: 600; }
+  #dropzone p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+  #fileInput { display: none; }
+
+  /* ===== 编辑器 ===== */
+  #editor { margin-top: 22px; display: none; }
+  .info-bar {
+    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 18px; font-size: 13px; color: var(--muted);
+  }
+  .info-bar strong { color: var(--text); word-break: break-all; }
+  .warn { color: var(--danger); }
+
+  .grid {
+    margin-top: 16px; display: grid; grid-template-columns: 260px 1fr; gap: 16px;
+  }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .cover-card, .form-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+  }
+  .cover-box {
+    width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; background: var(--card-2);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .cover-box img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-box .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px; }
+  .cover-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .cover-card.dragover { border-color: var(--accent); background: #23262e; }
+  .url-row { display: flex; gap: 8px; margin-top: 12px; }
+  .url-row input {
+    flex: 1; min-width: 0; background: var(--card-2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); padding: 9px 12px; font: inherit; outline: none;
+  }
+  .url-row input:focus { border-color: var(--accent); }
+  .url-row button { padding: 9px 14px; white-space: nowrap; }
+  .rename-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .rename-option input { accent-color: var(--accent); width: 15px; height: 15px; }
+
+  button {
+    font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--card-2); color: var(--text); padding: 10px 14px; transition: filter .15s, background .15s;
+  }
+  button:hover { filter: brightness(1.15); }
+  button.primary {
+    background: var(--accent); border-color: var(--accent); color: #1a1206; font-weight: 700;
+  }
+  button.primary:hover { background: var(--accent-2); }
+  button.ghost-danger { color: var(--danger); }
+
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .form-row input, .form-row textarea {
+    width: 100%; background: var(--card-2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); padding: 10px 12px; font: inherit; outline: none;
+  }
+  .form-row input:focus, .form-row textarea:focus { border-color: var(--accent); }
+  .form-row textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .player-card { margin-top: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; }
+  .player-card audio { width: 100%; margin-top: 8px; }
+
+  .toolbar { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  #status { margin-top: 14px; font-size: 13px; color: var(--muted); min-height: 18px; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--danger); }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>MP3 标签编辑器</h1>
+    <p>
+      <span class="badge">本地处理</span>文件不会上传到任何服务器，所有读写均在浏览器内完成。
+      支持读取并写回：封面、标题、歌手、专辑、专辑歌手、年份、流派、音轨号、碟片号、歌词。
+    </p>
+  </header>
+
+  <!-- ===== 拖放选区 ===== -->
+  <section id="dropzone">
+    <div class="icon">♫</div>
+    <h2>点击选择歌曲，或将音频文件拖到此处</h2>
+    <p>写回标签当前支持 MP3（ID3v2）；FLAC / M4A 等格式可读取预览，但导出标签可能不被支持。</p>
+    <div class="url-row" id="audioUrlRow" style="max-width:480px;margin:14px auto 0">
+      <input id="audioUrl" type="text" placeholder="也可粘贴音频文件直链，点击解析（可选）">
+      <button type="button" id="loadAudioUrl">解析</button>
+    </div>
+    <input type="file" id="fileInput" accept="audio/*,.mp3,.flac,.m4a,.ogg,.wav">
+  </section>
+
+  <!-- ===== 编辑区 ===== -->
+  <section id="editor">
+    <div class="info-bar">
+      <span>当前文件：<strong id="fileName">—</strong></span>
+      <span id="fileSize">—</span>
+      <span id="formatWarn" class="warn" hidden></span>
+    </div>
+
+    <div class="grid">
+      <div class="cover-card" id="coverCard">
+        <div class="cover-box" id="coverBox" title="点击选择本地图片，或直接把图片拖到此处">
+          <span class="empty" id="coverEmpty">暂无封面<br>点击选择 / 拖入图片</span>
+          <img id="coverPreview" alt="封面预览" hidden>
+        </div>
+        <div class="url-row">
+          <input id="coverUrl" type="text" placeholder="粘贴封面图片链接 URL">
+          <button type="button" id="loadCoverUrl">拉取</button>
+        </div>
+        <div class="cover-actions">
+          <button type="button" id="replaceCover">选择本地图片</button>
+          <button type="button" id="removeCover" class="ghost-danger">移除封面</button>
+        </div>
+        <input type="file" id="coverInput" accept="image/*" hidden>
+      </div>
+
+      <div class="form-card">
+        <div class="form-row">
+          <label for="fTitle">标题（TIT2）</label>
+          <input id="fTitle" type="text" placeholder="歌曲名">
+        </div>
+        <div class="two-col">
+          <div class="form-row">
+            <label for="fArtist">歌手（TPE1）</label>
+            <input id="fArtist" type="text" placeholder="主唱 / 艺术家">
+          </div>
+          <div class="form-row">
+            <label for="fAlbumArtist">专辑歌手（TPE2）</label>
+            <input id="fAlbumArtist" type="text" placeholder="专辑艺术家（可选）">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="fAlbum">专辑（TALB）</label>
+          <input id="fAlbum" type="text" placeholder="专辑名">
+        </div>
+        <div class="two-col">
+          <div class="form-row">
+            <label for="fYear">年份（TYER）</label>
+            <input id="fYear" type="text" inputmode="numeric" placeholder="如 2024">
+          </div>
+          <div class="form-row">
+            <label for="fGenre">流派（TCON）</label>
+            <input id="fGenre" type="text" placeholder="如 Pop / 流行">
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="form-row">
+            <label>音轨号（TRCK）</label>
+            <div class="two-col">
+              <input id="fTrackNo" type="text" inputmode="numeric" placeholder="第几首">
+              <input id="fTrackCount" type="text" inputmode="numeric" placeholder="共几首">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>碟片号（TPOS）</label>
+            <div class="two-col">
+              <input id="fDiscNo" type="text" inputmode="numeric" placeholder="第几张">
+              <input id="fDiscCount" type="text" inputmode="numeric" placeholder="共几张">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="fLyrics">歌词（USLT）</label>
+          <textarea id="fLyrics" placeholder="粘贴歌词，支持逐行文本；留空则不写入歌词帧"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="player-card">
+      <label style="font-size:12px;color:var(--muted)">试听原文件</label>
+      <audio id="player" controls hidden></audio>
+    </div>
+
+    <div class="toolbar">
+      <button type="button" class="primary" id="exportBtn">导出修改后的 MP3</button>
+      <label class="rename-option">
+        <input type="checkbox" id="autoRename" checked>
+        文件名自动命名为《标题 - 歌手》
+      </label>
+      <button type="button" id="resetBtn">重新选择文件</button>
+    </div>
+    <div id="status"></div>
+    <p class="hint">
+      说明：导出时会用上方填写的字段重建 ID3 标签；留空的字段不会写入。封面支持 JPG / PNG / GIF / WebP / BMP，可本地选择、直接拖入封面区，或粘贴图片链接拉取。
+      勾选「文件名自动命名」后，导出文件将按《标题 - 歌手》命名。链接抓取受浏览器跨域（CORS）限制，若失败请先把文件下载到本地再拖入；导出文件为浏览器本地生成，建议导出后在播放器中核对标签与封面。
+    </p>
+  </section>
+</div>
+
+<!-- 内嵌第三方库：browser-id3-writer 4.0.0（ID3 标签写入） -->
+<script>/**
+ * Skipped minification because the original files appears to be already minified.
+ * Original file: /npm/browser-id3-writer@4.0.0/dist/browser-id3-writer.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):e.ID3Writer=t()}(this,function(){"use strict";function e(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function t(e){return String(e).split("").map(function(e){return e.charCodeAt(0)})}function r(e){return new Uint8Array(t(e))}function n(e){var r=new Uint8Array(2*e.length);return new Uint16Array(r.buffer).set(t(e)),r}function a(e){return 73===e[0]&&68===e[1]&&51===e[2]}function i(e){if(!e||!e.length)return null;if(255===e[0]&&216===e[1]&&255===e[2])return"image/jpeg";if(137===e[0]&&80===e[1]&&78===e[2]&&71===e[3])return"image/png";if(71===e[0]&&73===e[1]&&70===e[2])return"image/gif";if(87===e[8]&&69===e[9]&&66===e[10]&&80===e[11])return"image/webp";var t=73===e[0]&&73===e[1]&&42===e[2]&&0===e[3],r=77===e[0]&&77===e[1]&&0===e[2]&&42===e[3];return t||r?"image/tiff":66===e[0]&&77===e[1]?"image/bmp":0===e[0]&&0===e[1]&&1===e[2]&&0===e[3]?"image/x-icon":null}function s(e){return[e>>>24&255,e>>>16&255,e>>>8&255,255&e]}function o(e){return[e>>>21&127,e>>>14&127,e>>>7&127,127&e]}function c(e){return(e[0]<<21)+(e[1]<<14)+(e[2]<<7)+e[3]}function u(e){return 11+e}function f(e){return 13+2*e}function h(e,t){return 16+2*e+2+2+2*t}function p(e,t,r,n){return 11+t+1+1+(n?2+2*(r+1):r+1)+e}function l(e,t){return 16+2*e+2+2+2*t}function g(e,t){return 13+2*e+2+2+2*t}function m(e){return 10+e}return function(){function t(r){if(e(this,t),!(r&&"object"==typeof r&&"byteLength"in r))throw new Error("First argument should be an instance of ArrayBuffer or Buffer");this.arrayBuffer=r,this.padding=4096,this.frames=[],this.url=""}return t.prototype._setIntegerFrame=function(e,t){var r=parseInt(t,10);this.frames.push({name:e,value:r,size:u(r.toString().length)})},t.prototype._setStringFrame=function(e,t){var r=t.toString();this.frames.push({name:e,value:r,size:f(r.length)})},t.prototype._setPictureFrame=function(e,t,r,n){var a=i(new Uint8Array(t)),s=r.toString();if(!a)throw new Error("Unknown picture MIME type");r||(n=!1),this.frames.push({name:"APIC",value:t,pictureType:e,mimeType:a,useUnicodeEncoding:n,description:s,size:p(t.byteLength,a.length,s.length,n)})},t.prototype._setLyricsFrame=function(e,t){var r=e.toString(),n=t.toString();this.frames.push({name:"USLT",value:n,description:r,size:h(r.length,n.length)})},t.prototype._setCommentFrame=function(e,t){var r=e.toString(),n=t.toString();this.frames.push({name:"COMM",value:n,description:r,size:l(r.length,n.length)})},t.prototype._setUserStringFrame=function(e,t){var r=e.toString(),n=t.toString();this.frames.push({name:"TXXX",description:r,value:n,size:g(r.length,n.length)})},t.prototype._setUrlLinkFrame=function(e,t){var r=t.toString();this.frames.push({name:e,value:r,size:m(r.length)})},t.prototype.setFrame=function(e,t){switch(e){case"TPE1":case"TCOM":case"TCON":if(!Array.isArray(t))throw new Error(e+" frame value should be an array of strings");var r="TCON"===e?";":"/",n=t.join(r);this._setStringFrame(e,n);break;case"TIT2":case"TALB":case"TPE2":case"TPE3":case"TPE4":case"TRCK":case"TPOS":case"TMED":case"TPUB":this._setStringFrame(e,t);break;case"TBPM":case"TLEN":case"TYER":this._setIntegerFrame(e,t);break;case"USLT":if(!("object"==typeof t&&"description"in t&&"lyrics"in t))throw new Error("USLT frame value should be an object with keys description and lyrics");this._setLyricsFrame(t.description,t.lyrics);break;case"APIC":if(!("object"==typeof t&&"type"in t&&"data"in t&&"description"in t))throw new Error("APIC frame value should be an object with keys type, data and description");if(t.type<0||t.type>20)throw new Error("Incorrect APIC frame picture type");this._setPictureFrame(t.type,t.data,t.description,!!t.useUnicodeEncoding);break;case"TXXX":if(!("object"==typeof t&&"description"in t&&"value"in t))throw new Error("TXXX frame value should be an object with keys description and value");this._setUserStringFrame(t.description,t.value);break;case"TKEY":if(!/^([A-G][#b]?m?|o)$/.test(t))throw new Error(e+" frame value should be like Dbm, C#, B or o");this._setStringFrame(e,t);break;case"WCOM":case"WCOP":case"WOAF":case"WOAR":case"WOAS":case"WORS":case"WPAY":case"WPUB":this._setUrlLinkFrame(e,t);break;case"COMM":if(!("object"==typeof t&&"description"in t&&"text"in t))throw new Error("COMM frame value should be an object with keys description and text");this._setCommentFrame(t.description,t.text);break;default:throw new Error("Unsupported frame "+e)}return this},t.prototype.removeTag=function(){if(!(this.arrayBuffer.byteLength<10)){var e=new Uint8Array(this.arrayBuffer),t=e[3],r=c([e[6],e[7],e[8],e[9]])+10;!a(e)||t<2||t>4||(this.arrayBuffer=new Uint8Array(e.subarray(r)).buffer)}},t.prototype.addTag=function(){this.removeTag();var e=[255,254],t=[101,110,103],a=10+this.frames.reduce(function(e,t){return e+t.size},0)+this.padding,i=new ArrayBuffer(this.arrayBuffer.byteLength+a),c=new Uint8Array(i),u=0,f=[];return f=[73,68,51,3],c.set(f,u),u+=f.length,u++,u++,f=o(a-10),c.set(f,u),u+=f.length,this.frames.forEach(function(a){switch(f=r(a.name),c.set(f,u),u+=f.length,f=s(a.size-10),c.set(f,u),u+=f.length,u+=2,a.name){case"WCOM":case"WCOP":case"WOAF":case"WOAR":case"WOAS":case"WORS":case"WPAY":case"WPUB":f=r(a.value),c.set(f,u),u+=f.length;break;case"TPE1":case"TCOM":case"TCON":case"TIT2":case"TALB":case"TPE2":case"TPE3":case"TPE4":case"TRCK":case"TPOS":case"TKEY":case"TMED":case"TPUB":f=[1].concat(e),c.set(f,u),u+=f.length,f=n(a.value),c.set(f,u),u+=f.length;break;case"TXXX":case"USLT":case"COMM":f=[1],"USLT"!==a.name&&"COMM"!==a.name||(f=f.concat(t)),f=f.concat(e),c.set(f,u),u+=f.length,f=n(a.description),c.set(f,u),u+=f.length,f=[0,0].concat(e),c.set(f,u),u+=f.length,f=n(a.value),c.set(f,u),u+=f.length;break;case"TBPM":case"TLEN":case"TYER":u++,f=r(a.value),c.set(f,u),u+=f.length;break;case"APIC":f=[a.useUnicodeEncoding?1:0],c.set(f,u),u+=f.length,f=r(a.mimeType),c.set(f,u),u+=f.length,f=[0,a.pictureType],c.set(f,u),u+=f.length,a.useUnicodeEncoding?(f=[].concat(e),c.set(f,u),u+=f.length,f=n(a.description),c.set(f,u),u+=f.length,u+=2):(f=r(a.description),c.set(f,u),u+=f.length,u++),c.set(new Uint8Array(a.value),u),u+=a.value.byteLength}}),u+=this.padding,c.set(new Uint8Array(this.arrayBuffer),u),this.arrayBuffer=i,i},t.prototype.getBlob=function(){return new Blob([this.arrayBuffer],{type:"audio/mpeg"})},t.prototype.getURL=function(){return this.url||(this.url=URL.createObjectURL(this.getBlob())),this.url},t.prototype.revokeURL=function(){URL.revokeObjectURL(this.url)},t}()});</script>
+<!-- 内嵌第三方库：jsmediatags 3.9.5（音频标签读取） -->
+<script>var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.ASSUME_ES5=!1;$jscomp.ASSUME_NO_NATIVE_MAP=!1;$jscomp.ASSUME_NO_NATIVE_SET=!1;$jscomp.defineProperty=$jscomp.ASSUME_ES5||"function"==typeof Object.defineProperties?Object.defineProperty:function(v,h,p){v!=Array.prototype&&v!=Object.prototype&&(v[h]=p.value)};$jscomp.getGlobal=function(v){return"undefined"!=typeof window&&window===v?v:"undefined"!=typeof global&&null!=global?global:v};$jscomp.global=$jscomp.getGlobal(this);
+$jscomp.polyfill=function(v,h,p,n){if(h){p=$jscomp.global;v=v.split(".");for(n=0;n<v.length-1;n++){var m=v[n];m in p||(p[m]={});p=p[m]}v=v[v.length-1];n=p[v];h=h(n);h!=n&&null!=h&&$jscomp.defineProperty(p,v,{configurable:!0,writable:!0,value:h})}};$jscomp.polyfill("Object.setPrototypeOf",function(v){return v?v:"object"!=typeof"".__proto__?null:function(h,p){h.__proto__=p;if(h.__proto__!==p)throw new TypeError(h+" is not extensible");return h}},"es6","es5");
+(function(v){"object"===typeof exports&&"undefined"!==typeof module?module.exports=v():"function"===typeof define&&define.amd?define([],v):("undefined"!==typeof window?window:"undefined"!==typeof global?global:"undefined"!==typeof self?self:this).jsmediatags=v()})(function(){return function h(p,n,m){function q(c,b){if(!n[c]){if(!p[c]){var g="function"==typeof require&&require;if(!b&&g)return g(c,!0);if(t)return t(c,!0);b=Error("Cannot find module '"+c+"'");throw b.code="MODULE_NOT_FOUND",b;}b=n[c]=
+{exports:{}};p[c][0].call(b.exports,function(b){var k=p[c][1][b];return q(k?k:b)},b,b.exports,h,p,n,m)}return n[c].exports}for(var t="function"==typeof require&&require,f=0;f<m.length;f++)q(m[f]);return q}({1:[function(h,p,n){},{}],2:[function(h,p,n){p.exports=XMLHttpRequest},{}],3:[function(h,p,n){function m(b){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?
+"symbol":typeof a};return m(b)}function q(b,a){for(var e=0;e<a.length;e++){var d=a[e];d.enumerable=d.enumerable||!1;d.configurable=!0;"value"in d&&(d.writable=!0);Object.defineProperty(b,d.key,d)}}function t(b,a,e){a&&q(b.prototype,a);e&&q(b,e);return b}function f(b){f=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)};return f(b)}function c(b){if(void 0===b)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return b}
+function b(b,a){if("function"!==typeof a&&null!==a)throw new TypeError("Super expression must either be null or a function");b.prototype=Object.create(a&&a.prototype,{constructor:{value:b,writable:!0,configurable:!0}});a&&g(b,a)}function g(b,a){g=Object.setPrototypeOf||function(a,d){a.__proto__=d;return a};return g(b,a)}function k(b,a,e){a in b?Object.defineProperty(b,a,{value:e,enumerable:!0,configurable:!0,writable:!0}):b[a]=e;return b}h=function(g){function a(e){if(!(this instanceof a))throw new TypeError("Cannot call a class as a function");
+var d=f(a).call(this);d=!d||"object"!==m(d)&&"function"!==typeof d?c(this):d;k(c(d),"_array",void 0);k(c(d),"_size",void 0);d._array=e;d._size=e.length;d._isInitialized=!0;return d}b(a,g);t(a,[{key:"init",value:function(a){setTimeout(a.onSuccess,0)}},{key:"loadRange",value:function(a,d){setTimeout(d.onSuccess,0)}},{key:"getByteAt",value:function(a){if(a>=this._array.length)throw Error("Offset "+a+" hasn't been loaded yet.");return this._array[a]}}],[{key:"canReadFile",value:function(a){return Array.isArray(a)||
+"function"===typeof Buffer&&Buffer.isBuffer(a)}}]);return a}(h("./MediaFileReader"));p.exports=h},{"./MediaFileReader":11}],4:[function(h,p,n){function m(a){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?"symbol":typeof a};return m(a)}function q(a,e){for(var d=0;d<e.length;d++){var l=e[d];l.enumerable=l.enumerable||!1;l.configurable=!0;"value"in l&&(l.writable=
+!0);Object.defineProperty(a,l.key,l)}}function t(a,e,d){e&&q(a.prototype,e);d&&q(a,d);return a}function f(a){f=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)};return f(a)}function c(a){if(void 0===a)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return a}function b(a,e){if("function"!==typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");a.prototype=Object.create(e&&
+e.prototype,{constructor:{value:a,writable:!0,configurable:!0}});e&&g(a,e)}function g(a,e){g=Object.setPrototypeOf||function(d,a){d.__proto__=a;return d};return g(a,e)}function k(a,e,d){e in a?Object.defineProperty(a,e,{value:d,enumerable:!0,configurable:!0,writable:!0}):a[e]=d;return a}var r=h("./ChunkedFileData");h=function(a){function e(d){if(!(this instanceof e))throw new TypeError("Cannot call a class as a function");var a=f(e).call(this);a=!a||"object"!==m(a)&&"function"!==typeof a?c(this):
+a;k(c(a),"_blob",void 0);k(c(a),"_fileData",void 0);a._blob=d;a._fileData=new r;return a}b(e,a);t(e,[{key:"_init",value:function(d){this._size=this._blob.size;setTimeout(d.onSuccess,1)}},{key:"loadRange",value:function(d,a){var e=this,l=(this._blob.slice||this._blob.mozSlice||this._blob.webkitSlice).call(this._blob,d[0],d[1]+1),b=new FileReader;b.onloadend=function(l){l=new Uint8Array(b.result);e._fileData.addData(d[0],l);a.onSuccess()};b.onerror=b.onabort=function(d){if(a.onError)a.onError({type:"blob",
+info:b.error})};b.readAsArrayBuffer(l)}},{key:"getByteAt",value:function(a){return this._fileData.getByteAt(a)}}],[{key:"canReadFile",value:function(a){return"undefined"!==typeof Blob&&a instanceof Blob||"undefined"!==typeof File&&a instanceof File}}]);return e}(h("./MediaFileReader"));p.exports=h},{"./ChunkedFileData":5,"./MediaFileReader":11}],5:[function(h,p,n){function m(h,f){for(var c=0;c<f.length;c++){var b=f[c];b.enumerable=b.enumerable||!1;b.configurable=!0;"value"in b&&(b.writable=!0);Object.defineProperty(h,
+b.key,b)}}function q(h,f,c){f&&m(h.prototype,f);c&&m(h,c);return h}h=function(){function h(){if(!(this instanceof h))throw new TypeError("Cannot call a class as a function");"_fileData"in this?Object.defineProperty(this,"_fileData",{value:void 0,enumerable:!0,configurable:!0,writable:!0}):this._fileData=void 0;this._fileData=[]}q(h,null,[{key:"NOT_FOUND",get:function(){return-1}}]);q(h,[{key:"addData",value:function(f,c){var b=f+c.length-1,g=this._getChunkRange(f,b);if(-1===g.startIx)this._fileData.splice(g.insertIx||
+0,0,{offset:f,data:c});else{var k=this._fileData[g.startIx],r=this._fileData[g.endIx];b=b<r.offset+r.data.length-1;var a={offset:Math.min(f,k.offset),data:c};f>k.offset&&(f=this._sliceData(k.data,0,f-k.offset),a.data=this._concatData(f,c));b&&(f=this._sliceData(a.data,0,r.offset-a.offset),a.data=this._concatData(f,r.data));this._fileData.splice(g.startIx,g.endIx-g.startIx+1,a)}}},{key:"_concatData",value:function(f,c){if("undefined"!==typeof ArrayBuffer&&ArrayBuffer.isView&&ArrayBuffer.isView(f)){var b=
+new f.constructor(f.length+c.length);b.set(f,0);b.set(c,f.length);return b}return f.concat(c)}},{key:"_sliceData",value:function(f,c,b){return f.slice?f.slice(c,b):f.subarray(c,b)}},{key:"_getChunkRange",value:function(f,c){for(var b,g,k=-1,r=-1,a=0,e=0;e<this._fileData.length;e++,a=e){g=this._fileData[e].offset;b=g+this._fileData[e].data.length;if(c<g-1)break;if(f<=b+1&&c>=g-1){k=e;break}}if(-1===k)return{startIx:-1,endIx:-1,insertIx:a};for(e=k;e<this._fileData.length&&!(g=this._fileData[e].offset,
+b=g+this._fileData[e].data.length,c>=g-1&&(r=e),c<=b+1);e++);-1===r&&(r=k);return{startIx:k,endIx:r}}},{key:"hasDataRange",value:function(f,c){for(var b=0;b<this._fileData.length;b++){var g=this._fileData[b];if(c<g.offset)break;if(f>=g.offset&&c<g.offset+g.data.length)return!0}return!1}},{key:"getByteAt",value:function(f){for(var c,b=0;b<this._fileData.length;b++){var g=this._fileData[b].offset,k=g+this._fileData[b].data.length-1;if(f>=g&&f<=k){c=this._fileData[b];break}}if(c)return c.data[f-c.offset];
+throw Error("Offset "+f+" hasn't been loaded yet.");}}]);return h}();p.exports=h},{}],6:[function(h,p,n){function m(a){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?"symbol":typeof a};return m(a)}function q(a,e){for(var d=0;d<e.length;d++){var b=e[d];b.enumerable=b.enumerable||!1;b.configurable=!0;"value"in b&&(b.writable=!0);Object.defineProperty(a,b.key,b)}}
+function t(a,e,b){e&&q(a.prototype,e);b&&q(a,b);return a}function f(a){f=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)};return f(a)}function c(a){if(void 0===a)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return a}function b(a,e){if("function"!==typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");a.prototype=Object.create(e&&e.prototype,{constructor:{value:a,writable:!0,
+configurable:!0}});e&&g(a,e)}function g(a,e){g=Object.setPrototypeOf||function(a,d){a.__proto__=d;return a};return g(a,e)}function k(a,e,b){e in a?Object.defineProperty(a,e,{value:b,enumerable:!0,configurable:!0,writable:!0}):a[e]=b;return a}var r=[4,132],a=[6,134],e="Other;32x32 pixels 'file icon' (PNG only);Other file icon;Cover (front);Cover (back);Leaflet page;Media (e.g. label side of CD);Lead artist/lead performer/soloist;Artist/performer;Conductor;Band/Orchestra;Composer;Lyricist/text writer;Recording Location;During recording;During performance;Movie/video screen capture;A bright coloured fish;Illustration;Band/artist logotype;Publisher/Studio logotype".split(";");
+h=function(d){function l(){var a;if(!(this instanceof l))throw new TypeError("Cannot call a class as a function");for(var d=arguments.length,e=Array(d),b=0;b<d;b++)e[b]=arguments[b];d=(a=f(l)).call.apply(a,[this].concat(e));a=!d||"object"!==m(d)&&"function"!==typeof d?c(this):d;k(c(a),"_commentOffset",void 0);k(c(a),"_pictureOffset",void 0);return a}b(l,d);t(l,[{key:"_loadData",value:function(a,d){var e=this;a.loadRange([4,7],{onSuccess:function(){e._loadBlock(a,4,d)}})}},{key:"_loadBlock",value:function(d,
+e,b){var l=this,c=d.getByteAt(e),k=d.getInteger24At(e+1,!0);if(-1!==r.indexOf(c)){var g=e+4;d.loadRange([g,g+k],{onSuccess:function(){l._commentOffset=g;l._nextBlock(d,e,c,k,b)}})}else-1!==a.indexOf(c)?(g=e+4,d.loadRange([g,g+k],{onSuccess:function(){l._pictureOffset=g;l._nextBlock(d,e,c,k,b)}})):l._nextBlock(d,e,c,k,b)}},{key:"_nextBlock",value:function(a,d,e,b,l){var c=this;if(127<e)if(c._commentOffset)l.onSuccess();else l.onError({type:"loadData",info:"Comment block could not be found."});else a.loadRange([d+
+4+b,d+4+4+b],{onSuccess:function(){c._loadBlock(a,d+4+b,l)}})}},{key:"_parseData",value:function(a,d){var b=a.getLongAt(this._commentOffset,!1)+(this._commentOffset+4);d=a.getLongAt(b,!1);b+=4;for(var l,c,k,g,u,r,f=0;f<d;f++){var w=a.getLongAt(b,!1),h=a.getStringWithCharsetAt(b+4,w,"utf-8").toString(),m=h.indexOf("=");h=[h.slice(0,m),h.slice(m+1)];switch(h[0].toUpperCase()){case "TITLE":l=h[1];break;case "ARTIST":c=h[1];break;case "ALBUM":k=h[1];break;case "TRACKNUMBER":g=h[1];break;case "GENRE":u=
+h[1]}b+=4+w}this._pictureOffset&&(r=a.getLongAt(this._pictureOffset,!0),d=this._pictureOffset+4,b=a.getLongAt(d,!0),f=d+4,d=a.getStringAt(f,b),b=f+b,f=a.getLongAt(b,!0),w=b+4,b=a.getStringWithCharsetAt(w,f,"utf-8").toString(),f=w+f+16,w=a.getLongAt(f,!0),a=a.getBytesAt(f+4,w,!0),r={format:d,type:e[r],description:b,data:a});return{type:"FLAC",version:"1",tags:{title:l,artist:c,album:k,track:g,genre:u,picture:r}}}}],[{key:"getTagIdentifierByteRange",value:function(){return{offset:0,length:4}}},{key:"canReadTagFormat",
+value:function(a){return"fLaC"===String.fromCharCode.apply(String,a.slice(0,4))}}]);return l}(h("./MediaTagReader"));p.exports=h},{"./MediaTagReader":12}],7:[function(h,p,n){function m(b){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(b){return typeof b}:function(b){return b&&"function"===typeof Symbol&&b.constructor===Symbol&&b!==Symbol.prototype?"symbol":typeof b};return m(b)}function q(b,c){for(var a=0;a<c.length;a++){var e=c[a];e.enumerable=e.enumerable||!1;e.configurable=
+!0;"value"in e&&(e.writable=!0);Object.defineProperty(b,e.key,e)}}function t(b,c,a){c&&q(b.prototype,c);a&&q(b,a);return b}function f(b){f=Object.setPrototypeOf?Object.getPrototypeOf:function(b){return b.__proto__||Object.getPrototypeOf(b)};return f(b)}function c(c,g){if("function"!==typeof g&&null!==g)throw new TypeError("Super expression must either be null or a function");c.prototype=Object.create(g&&g.prototype,{constructor:{value:c,writable:!0,configurable:!0}});g&&b(c,g)}function b(c,g){b=Object.setPrototypeOf||
+function(a,e){a.__proto__=e;return a};return b(c,g)}n=h("./MediaTagReader");h("./MediaFileReader");h=function(b){function k(){if(!(this instanceof k))throw new TypeError("Cannot call a class as a function");var a=f(k).apply(this,arguments);if(!a||"object"!==m(a)&&"function"!==typeof a){if(void 0===this)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");a=this}return a}c(k,b);t(k,[{key:"_loadData",value:function(a,e){var d=a.getSize();a.loadRange([d-128,d-1],e)}},
+{key:"_parseData",value:function(a,e){var d=a.getSize()-128,b=a.getStringWithCharsetAt(d+3,30).toString(),c=a.getStringWithCharsetAt(d+33,30).toString(),k=a.getStringWithCharsetAt(d+63,30).toString(),f=a.getStringWithCharsetAt(d+93,4).toString();var h=a.getByteAt(d+97+28);e=a.getByteAt(d+97+29);if(0==h&&0!=e){var r="1.1";h=a.getStringWithCharsetAt(d+97,28).toString()}else r="1.0",h=a.getStringWithCharsetAt(d+97,30).toString(),e=0;a=a.getByteAt(d+97+30);a={type:"ID3",version:r,tags:{title:b,artist:c,
+album:k,year:f,comment:h,genre:255>a?g[a]:""}};e&&(a.tags.track=e);return a}}],[{key:"getTagIdentifierByteRange",value:function(){return{offset:-128,length:128}}},{key:"canReadTagFormat",value:function(a){return"TAG"===String.fromCharCode.apply(String,a.slice(0,3))}}]);return k}(n);var g="Blues;Classic Rock;Country;Dance;Disco;Funk;Grunge;Hip-Hop;Jazz;Metal;New Age;Oldies;Other;Pop;R&B;Rap;Reggae;Rock;Techno;Industrial;Alternative;Ska;Death Metal;Pranks;Soundtrack;Euro-Techno;Ambient;Trip-Hop;Vocal;Jazz+Funk;Fusion;Trance;Classical;Instrumental;Acid;House;Game;Sound Clip;Gospel;Noise;AlternRock;Bass;Soul;Punk;Space;Meditative;Instrumental Pop;Instrumental Rock;Ethnic;Gothic;Darkwave;Techno-Industrial;Electronic;Pop-Folk;Eurodance;Dream;Southern Rock;Comedy;Cult;Gangsta;Top 40;Christian Rap;Pop/Funk;Jungle;Native American;Cabaret;New Wave;Psychadelic;Rave;Showtunes;Trailer;Lo-Fi;Tribal;Acid Punk;Acid Jazz;Polka;Retro;Musical;Rock & Roll;Hard Rock;Folk;Folk-Rock;National Folk;Swing;Fast Fusion;Bebob;Latin;Revival;Celtic;Bluegrass;Avantgarde;Gothic Rock;Progressive Rock;Psychedelic Rock;Symphonic Rock;Slow Rock;Big Band;Chorus;Easy Listening;Acoustic;Humour;Speech;Chanson;Opera;Chamber Music;Sonata;Symphony;Booty Bass;Primus;Porn Groove;Satire;Slow Jam;Club;Tango;Samba;Folklore;Ballad;Power Ballad;Rhythmic Soul;Freestyle;Duet;Punk Rock;Drum Solo;Acapella;Euro-House;Dance Hall".split(";");
+p.exports=h},{"./MediaFileReader":11,"./MediaTagReader":12}],8:[function(h,p,n){function m(a,e){for(var d=0;d<e.length;d++){var b=e[d];b.enumerable=b.enumerable||!1;b.configurable=!0;"value"in b&&(b.writable=!0);Object.defineProperty(a,b.key,b)}}function q(a,e,d){e&&m(a.prototype,e);d&&m(a,d);return a}function t(a){switch(a){case 0:a="iso-8859-1";break;case 1:a="utf-16";break;case 2:a="utf-16be";break;case 3:a="utf-8";break;default:a="iso-8859-1"}return a}function f(a,e,d,b){var l=d.getStringWithCharsetAt(a+
+1,e-1,b);a=d.getStringWithCharsetAt(a+1+l.bytesReadCount,e-1-l.bytesReadCount,b);return{user_description:l.toString(),data:a.toString()}}h("./MediaFileReader");var c=h("./StringUtils"),b=h("./ArrayFileReader"),g={BUF:"Recommended buffer size",CNT:"Play counter",COM:"Comments",CRA:"Audio encryption",CRM:"Encrypted meta frame",ETC:"Event timing codes",EQU:"Equalization",GEO:"General encapsulated object",IPL:"Involved people list",LNK:"Linked information",MCI:"Music CD Identifier",MLL:"MPEG location lookup table",
+PIC:"Attached picture",POP:"Popularimeter",REV:"Reverb",RVA:"Relative volume adjustment",SLT:"Synchronized lyric/text",STC:"Synced tempo codes",TAL:"Album/Movie/Show title",TBP:"BPM (Beats Per Minute)",TCM:"Composer",TCO:"Content type",TCR:"Copyright message",TDA:"Date",TDY:"Playlist delay",TEN:"Encoded by",TFT:"File type",TIM:"Time",TKE:"Initial key",TLA:"Language(s)",TLE:"Length",TMT:"Media type",TOA:"Original artist(s)/performer(s)",TOF:"Original filename",TOL:"Original Lyricist(s)/text writer(s)",
+TOR:"Original release year",TOT:"Original album/Movie/Show title",TP1:"Lead artist(s)/Lead performer(s)/Soloist(s)/Performing group",TP2:"Band/Orchestra/Accompaniment",TP3:"Conductor/Performer refinement",TP4:"Interpreted, remixed, or otherwise modified by",TPA:"Part of a set",TPB:"Publisher",TRC:"ISRC (International Standard Recording Code)",TRD:"Recording dates",TRK:"Track number/Position in set",TSI:"Size",TSS:"Software/hardware and settings used for encoding",TT1:"Content group description",TT2:"Title/Songname/Content description",
+TT3:"Subtitle/Description refinement",TXT:"Lyricist/text writer",TXX:"User defined text information frame",TYE:"Year",UFI:"Unique file identifier",ULT:"Unsychronized lyric/text transcription",WAF:"Official audio file webpage",WAR:"Official artist/performer webpage",WAS:"Official audio source webpage",WCM:"Commercial information",WCP:"Copyright/Legal information",WPB:"Publishers official webpage",WXX:"User defined URL link frame",AENC:"Audio encryption",APIC:"Attached picture",ASPI:"Audio seek point index",
+CHAP:"Chapter",CTOC:"Table of contents",COMM:"Comments",COMR:"Commercial frame",ENCR:"Encryption method registration",EQU2:"Equalisation (2)",EQUA:"Equalization",ETCO:"Event timing codes",GEOB:"General encapsulated object",GRID:"Group identification registration",IPLS:"Involved people list",LINK:"Linked information",MCDI:"Music CD identifier",MLLT:"MPEG location lookup table",OWNE:"Ownership frame",PRIV:"Private frame",PCNT:"Play counter",POPM:"Popularimeter",POSS:"Position synchronisation frame",
+RBUF:"Recommended buffer size",RVA2:"Relative volume adjustment (2)",RVAD:"Relative volume adjustment",RVRB:"Reverb",SEEK:"Seek frame",SYLT:"Synchronized lyric/text",SYTC:"Synchronized tempo codes",TALB:"Album/Movie/Show title",TBPM:"BPM (beats per minute)",TCOM:"Composer",TCON:"Content type",TCOP:"Copyright message",TDAT:"Date",TDLY:"Playlist delay",TDRC:"Recording time",TDRL:"Release time",TDTG:"Tagging time",TENC:"Encoded by",TEXT:"Lyricist/Text writer",TFLT:"File type",TIME:"Time",TIPL:"Involved people list",
+TIT1:"Content group description",TIT2:"Title/songname/content description",TIT3:"Subtitle/Description refinement",TKEY:"Initial key",TLAN:"Language(s)",TLEN:"Length",TMCL:"Musician credits list",TMED:"Media type",TMOO:"Mood",TOAL:"Original album/movie/show title",TOFN:"Original filename",TOLY:"Original lyricist(s)/text writer(s)",TOPE:"Original artist(s)/performer(s)",TORY:"Original release year",TOWN:"File owner/licensee",TPE1:"Lead performer(s)/Soloist(s)",TPE2:"Band/orchestra/accompaniment",TPE3:"Conductor/performer refinement",
+TPE4:"Interpreted, remixed, or otherwise modified by",TPOS:"Part of a set",TPRO:"Produced notice",TPUB:"Publisher",TRCK:"Track number/Position in set",TRDA:"Recording dates",TRSN:"Internet radio station name",TRSO:"Internet radio station owner",TSOA:"Album sort order",TSOP:"Performer sort order",TSOT:"Title sort order",TSIZ:"Size",TSRC:"ISRC (international standard recording code)",TSSE:"Software/Hardware and settings used for encoding",TSST:"Set subtitle",TYER:"Year",TXXX:"User defined text information frame",
+UFID:"Unique file identifier",USER:"Terms of use",USLT:"Unsychronized lyric/text transcription",WCOM:"Commercial information",WCOP:"Copyright/Legal information",WOAF:"Official audio file webpage",WOAR:"Official artist/performer webpage",WOAS:"Official audio source webpage",WORS:"Official internet radio station homepage",WPAY:"Payment",WPUB:"Publishers official webpage",WXXX:"User defined URL link frame"};h=function(){function a(){if(!(this instanceof a))throw new TypeError("Cannot call a class as a function");
+}q(a,null,[{key:"getFrameReaderFunction",value:function(a){return a in k?k[a]:"T"===a[0]?k["T*"]:"W"===a[0]?k["W*"]:null}},{key:"readFrames",value:function(e,d,b,c,g){for(var l={},k=this._getFrameHeaderSize(c);e<d-k;){var f=this._readFrameHeader(b,e,c),u=f.id;if(!u)break;var h=f.flags,w=f.size,r=e+f.headerSize,m=b;e+=f.headerSize+f.size;if(!g||-1!==g.indexOf(u)){if("MP3e"===u||"\x00MP3"===u||"\x00\x00MP"===u||" MP3"===u)break;h&&h.format.unsynchronisation&&!c.flags.unsynchronisation&&(m=this.getUnsyncFileReader(m,
+r,w),r=0,w=m.getSize());h&&h.format.data_length_indicator&&(r+=4,w-=4);h=(f=a.getFrameReaderFunction(u))?f.apply(this,[r,w,m,h,c]):null;r=this._getFrameDescription(u);w={id:u,size:w,description:r,data:h};u in l?(l[u].id&&(l[u]=[l[u]]),l[u].push(w)):l[u]=w}}return l}},{key:"_getFrameHeaderSize",value:function(a){a=a.major;return 2==a?6:3==a||4==a?10:0}},{key:"_readFrameHeader",value:function(a,d,b){var e=b.major,l=null;b=this._getFrameHeaderSize(b);switch(e){case 2:var c=a.getStringAt(d,3);var g=a.getInteger24At(d+
+3,!0);break;case 3:c=a.getStringAt(d,4);g=a.getLongAt(d+4,!0);break;case 4:c=a.getStringAt(d,4),g=a.getSynchsafeInteger32At(d+4)}if(c==String.fromCharCode(0,0,0)||c==String.fromCharCode(0,0,0,0))c="";c&&2<e&&(l=this._readFrameFlags(a,d+8));return{id:c||"",size:g||0,headerSize:b||0,flags:l}}},{key:"_readFrameFlags",value:function(a,d){return{message:{tag_alter_preservation:a.isBitSetAt(d,6),file_alter_preservation:a.isBitSetAt(d,5),read_only:a.isBitSetAt(d,4)},format:{grouping_identity:a.isBitSetAt(d+
+1,7),compression:a.isBitSetAt(d+1,3),encryption:a.isBitSetAt(d+1,2),unsynchronisation:a.isBitSetAt(d+1,1),data_length_indicator:a.isBitSetAt(d+1,0)}}}},{key:"_getFrameDescription",value:function(a){return a in g?g[a]:"Unknown"}},{key:"getUnsyncFileReader",value:function(a,d,l){a=a.getBytesAt(d,l);for(d=0;d<a.length-1;d++)255===a[d]&&0===a[d+1]&&a.splice(d+1,1);return new b(a)}}]);return a}();var k={APIC:function(a,b,d,l,c){l=a;var e=t(d.getByteAt(a));switch(c&&c.major){case 2:c=d.getStringAt(a+1,
+3);a+=4;break;case 3:case 4:c=d.getStringWithCharsetAt(a+1,b-1);a+=1+c.bytesReadCount;break;default:throw Error("Couldn't read ID3v2 major version.");}var g=d.getByteAt(a);g=r[g];e=d.getStringWithCharsetAt(a+1,b-(a-l)-1,e);a+=1+e.bytesReadCount;return{format:c.toString(),type:g,description:e.toString(),data:d.getBytesAt(a,l+b-a)}},CHAP:function(a,b,d,l,g){l=a;var e={},k=c.readNullTerminatedString(d.getBytesAt(a,b));e.id=k.toString();a+=k.bytesReadCount;e.startTime=d.getLongAt(a,!0);a+=4;e.endTime=
+d.getLongAt(a,!0);a+=4;e.startOffset=d.getLongAt(a,!0);a+=4;e.endOffset=d.getLongAt(a,!0);a+=4;e.subFrames=this.readFrames(a,a+(b-(a-l)),d,g);return e},CTOC:function(a,b,d,l,g){l=a;var e={childElementIds:[],id:void 0,topLevel:void 0,ordered:void 0,entryCount:void 0,subFrames:void 0},k=c.readNullTerminatedString(d.getBytesAt(a,b));e.id=k.toString();a+=k.bytesReadCount;e.topLevel=d.isBitSetAt(a,1);e.ordered=d.isBitSetAt(a,0);a++;e.entryCount=d.getByteAt(a);a++;for(k=0;k<e.entryCount;k++){var f=c.readNullTerminatedString(d.getBytesAt(a,
+b-(a-l)));e.childElementIds.push(f.toString());a+=f.bytesReadCount}e.subFrames=this.readFrames(a,a+(b-(a-l)),d,g);return e},COMM:function(a,b,d,l,c){var e=a,g=t(d.getByteAt(a));l=d.getStringAt(a+1,3);c=d.getStringWithCharsetAt(a+4,b-4,g);a+=4+c.bytesReadCount;a=d.getStringWithCharsetAt(a,e+b-a,g);return{language:l,short_description:c.toString(),text:a.toString()}}};k.COM=k.COMM;k.PIC=function(a,b,d,l,c){return k.APIC(a,b,d,l,c)};k.PCNT=function(a,b,d,l,c){return d.getLongAt(a,!1)};k.CNT=k.PCNT;k["T*"]=
+function(a,b,d,l,c){l=t(d.getByteAt(a));return d.getStringWithCharsetAt(a+1,b-1,l).toString()};k.TXXX=function(a,b,d,l,c){l=t(d.getByteAt(a));return f(a,b,d,l)};k.WXXX=function(a,b,d,l,c){if(0===b)return null;l=t(d.getByteAt(a));return f(a,b,d,l)};k["W*"]=function(a,b,d,l,c){return 0===b?null:d.getStringWithCharsetAt(a,b,"iso-8859-1").toString()};k.TCON=function(a,b,d,l){return k["T*"].apply(this,arguments).replace(/^\(\d+\)/,"")};k.TCO=k.TCON;k.USLT=function(a,b,d,l,c){var e=a,g=t(d.getByteAt(a));
+l=d.getStringAt(a+1,3);c=d.getStringWithCharsetAt(a+4,b-4,g);a+=4+c.bytesReadCount;a=d.getStringWithCharsetAt(a,e+b-a,g);return{language:l,descriptor:c.toString(),lyrics:a.toString()}};k.ULT=k.USLT;k.UFID=function(a,b,d,l,g){l=c.readNullTerminatedString(d.getBytesAt(a,b));a+=l.bytesReadCount;a=d.getBytesAt(a,b-l.bytesReadCount);return{ownerIdentifier:l.toString(),identifier:a}};var r="Other;32x32 pixels 'file icon' (PNG only);Other file icon;Cover (front);Cover (back);Leaflet page;Media (e.g. label side of CD);Lead artist/lead performer/soloist;Artist/performer;Conductor;Band/Orchestra;Composer;Lyricist/text writer;Recording Location;During recording;During performance;Movie/video screen capture;A bright coloured fish;Illustration;Band/artist logotype;Publisher/Studio logotype".split(";");
+p.exports=h},{"./ArrayFileReader":3,"./MediaFileReader":11,"./StringUtils":13}],9:[function(h,p,n){function m(b){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?"symbol":typeof a};return m(b)}function q(b,a){for(var e=0;e<a.length;e++){var d=a[e];d.enumerable=d.enumerable||!1;d.configurable=!0;"value"in d&&(d.writable=!0);Object.defineProperty(b,d.key,d)}}function t(b,
+a,e){a&&q(b.prototype,a);e&&q(b,e);return b}function f(b){f=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)};return f(b)}function c(c,a){if("function"!==typeof a&&null!==a)throw new TypeError("Super expression must either be null or a function");c.prototype=Object.create(a&&a.prototype,{constructor:{value:c,writable:!0,configurable:!0}});a&&b(c,a)}function b(c,a){b=Object.setPrototypeOf||function(a,d){a.__proto__=d;return a};return b(c,a)}n=h("./MediaTagReader");
+h("./MediaFileReader");var g=h("./ID3v2FrameReader");h=function(b){function a(){if(!(this instanceof a))throw new TypeError("Cannot call a class as a function");var b=f(a).apply(this,arguments);if(!b||"object"!==m(b)&&"function"!==typeof b){if(void 0===this)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");b=this}return b}c(a,b);t(a,[{key:"_loadData",value:function(a,b){a.loadRange([6,9],{onSuccess:function(){a.loadRange([0,10+a.getSynchsafeInteger32At(6)-1],b)},
+onError:b.onError})}},{key:"_parseData",value:function(a,b){var d,e=0,c=a.getByteAt(e+3);if(4<c)return{type:"ID3",version:">2.4",tags:{}};var f=a.getByteAt(e+4),h=a.isBitSetAt(e+5,7),r=a.isBitSetAt(e+5,6),m=a.isBitSetAt(e+5,5),p=a.getSynchsafeInteger32At(e+6);e+=10;if(r)if(4===c){var n=a.getSynchsafeInteger32At(e);e+=n}else n=a.getLongAt(e,!0),e+=n+4;n={type:"ID3",version:"2."+c+"."+f,major:c,revision:f,flags:{unsynchronisation:h,extended_header:r,experimental_indicator:m,footer_present:!1},size:p,
+tags:{}};b&&(d=this._expandShortcutTags(b));b=p+10;n.flags.unsynchronisation&&(a=g.getUnsyncFileReader(a,e,p),e=0,b=a.getSize());a=g.readFrames(e,b,a,n,d);for(var q in k)k.hasOwnProperty(q)&&(d=this._getFrameData(a,k[q]))&&(n.tags[q]=d);for(var t in a)a.hasOwnProperty(t)&&(n.tags[t]=a[t]);return n}},{key:"_getFrameData",value:function(a,b){for(var d=0,e;e=b[d];d++)if(e in a)return a=a[e]instanceof Array?a[e][0]:a[e],a.data}},{key:"getShortcuts",value:function(){return k}}],[{key:"getTagIdentifierByteRange",
+value:function(){return{offset:0,length:10}}},{key:"canReadTagFormat",value:function(a){return"ID3"===String.fromCharCode.apply(String,a.slice(0,3))}}]);return a}(n);var k={title:["TIT2","TT2"],artist:["TPE1","TP1"],album:["TALB","TAL"],year:["TYER","TYE"],comment:["COMM","COM"],track:["TRCK","TRK"],genre:["TCON","TCO"],picture:["APIC","PIC"],lyrics:["USLT","ULT"]};p.exports=h},{"./ID3v2FrameReader":8,"./MediaFileReader":11,"./MediaTagReader":12}],10:[function(h,p,n){function m(a){m="function"===
+typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?"symbol":typeof a};return m(a)}function q(a,b){for(var d=0;d<b.length;d++){var e=b[d];e.enumerable=e.enumerable||!1;e.configurable=!0;"value"in e&&(e.writable=!0);Object.defineProperty(a,e.key,e)}}function t(a,b,d){b&&q(a.prototype,b);d&&q(a,d);return a}function f(a){f=Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||
+Object.getPrototypeOf(a)};return f(a)}function c(a,e){if("function"!==typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");a.prototype=Object.create(e&&e.prototype,{constructor:{value:a,writable:!0,configurable:!0}});e&&b(a,e)}function b(a,e){b=Object.setPrototypeOf||function(a,b){a.__proto__=b;return a};return b(a,e)}n=h("./MediaTagReader");h("./MediaFileReader");h=function(a){function b(){if(!(this instanceof b))throw new TypeError("Cannot call a class as a function");
+var a=f(b).apply(this,arguments);if(!a||"object"!==m(a)&&"function"!==typeof a){if(void 0===this)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");a=this}return a}c(b,a);t(b,[{key:"_loadData",value:function(a,b){var d=this;a.loadRange([0,16],{onSuccess:function(){d._loadAtom(a,0,"",b)},onError:b.onError})}},{key:"_loadAtom",value:function(a,b,e,c){if(b>=a.getSize())c.onSuccess();else{var d=this,l=a.getLongAt(b,!0);if(0==l||isNaN(l))c.onSuccess();else{var g=a.getStringAt(b+
+4,4);if(this._isContainerAtom(g)){"meta"==g&&(b+=4);var k=(e?e+".":"")+g;"moov.udta.meta.ilst"===k?a.loadRange([b,b+l],c):a.loadRange([b+8,b+8+8],{onSuccess:function(){d._loadAtom(a,b+8,k,c)},onError:c.onError})}else a.loadRange([b+l,b+l+8],{onSuccess:function(){d._loadAtom(a,b+l,e,c)},onError:c.onError})}}}},{key:"_isContainerAtom",value:function(a){return 0<=["moov","udta","meta","ilst"].indexOf(a)}},{key:"_canReadAtom",value:function(a){return"----"!==a}},{key:"_parseData",value:function(a,b){var d=
+{};b=this._expandShortcutTags(b);this._readAtom(d,a,0,a.getSize(),b);for(var e in r)r.hasOwnProperty(e)&&(b=d[r[e]])&&(d[e]="track"===e?b.data.track:b.data);return{type:"MP4",ftyp:a.getStringAt(8,4),version:a.getLongAt(12,!0),tags:d}}},{key:"_readAtom",value:function(a,b,e,c,g,k,f){f=void 0===f?"":f+"  ";for(var d=e;d<e+c;){var l=b.getLongAt(d,!0);if(0==l)break;var h=b.getStringAt(d+4,4);if(this._isContainerAtom(h)){"meta"==h&&(d+=4);this._readAtom(a,b,d+8,l-8,g,(k?k+".":"")+h,f);break}(!g||0<=g.indexOf(h))&&
+"moov.udta.meta.ilst"===k&&this._canReadAtom(h)&&(a[h]=this._readMetadataAtom(b,d));d+=l}}},{key:"_readMetadataAtom",value:function(a,b){var d=a.getLongAt(b,!0),e=a.getStringAt(b+4,4),c=a.getInteger24At(b+16+1,!0);c=g[c];if("trkn"==e)var l={track:a.getByteAt(b+16+11),total:a.getByteAt(b+16+13)};else if("disk"==e)l={disk:a.getByteAt(b+16+11),total:a.getByteAt(b+16+13)};else{b+=24;var f=d-24;"covr"===e&&"uint8"===c&&(c="jpeg");switch(c){case "text":l=a.getStringWithCharsetAt(b,f,"utf-8").toString();
+break;case "uint8":l=a.getShortAt(b,!1);break;case "int":case "uint":l=("int"==c?1==f?a.getSByteAt:2==f?a.getSShortAt:4==f?a.getSLongAt:a.getLongAt:1==f?a.getByteAt:2==f?a.getShortAt:a.getLongAt).call(a,b+(8==f?4:0),!0);break;case "jpeg":case "png":l={format:"image/"+c,data:a.getBytesAt(b,f)}}}return{id:e,size:d,description:k[e]||"Unknown",data:l}}},{key:"getShortcuts",value:function(){return r}}],[{key:"getTagIdentifierByteRange",value:function(){return{offset:0,length:16}}},{key:"canReadTagFormat",
+value:function(a){return"ftyp"===String.fromCharCode.apply(String,a.slice(4,8))}}]);return b}(n);var g={0:"uint8",1:"text",13:"jpeg",14:"png",21:"int",22:"uint"},k={"\u00a9alb":"Album","\u00a9ART":"Artist",aART:"Album Artist","\u00a9day":"Release Date","\u00a9nam":"Title","\u00a9gen":"Genre",gnre:"Genre",trkn:"Track Number","\u00a9wrt":"Composer","\u00a9too":"Encoding Tool","\u00a9enc":"Encoded By",cprt:"Copyright",covr:"Cover Art","\u00a9grp":"Grouping",keyw:"Keywords","\u00a9lyr":"Lyrics","\u00a9cmt":"Comment",
+tmpo:"Tempo",cpil:"Compilation",disk:"Disc Number",tvsh:"TV Show Name",tven:"TV Episode ID",tvsn:"TV Season",tves:"TV Episode",tvnn:"TV Network",desc:"Description",ldes:"Long Description",sonm:"Sort Name",soar:"Sort Artist",soaa:"Sort Album",soco:"Sort Composer",sosn:"Sort Show",purd:"Purchase Date",pcst:"Podcast",purl:"Podcast URL",catg:"Category",hdvd:"HD Video",stik:"Media Type",rtng:"Content Rating",pgap:"Gapless Playback",apID:"Purchase Account",sfID:"Country Code",atID:"Artist ID",cnID:"Catalog ID",
+plID:"Collection ID",geID:"Genre ID","xid ":"Vendor Information",flvr:"Codec Flavor"},r={title:"\u00a9nam",artist:"\u00a9ART",album:"\u00a9alb",year:"\u00a9day",comment:"\u00a9cmt",track:"trkn",genre:"\u00a9gen",picture:"covr",lyrics:"\u00a9lyr"};p.exports=h},{"./MediaFileReader":11,"./MediaTagReader":12}],11:[function(h,p,n){function m(c,b){for(var g=0;g<b.length;g++){var k=b[g];k.enumerable=k.enumerable||!1;k.configurable=!0;"value"in k&&(k.writable=!0);Object.defineProperty(c,k.key,k)}}function q(c,
+b,g){b&&m(c.prototype,b);g&&m(c,g);return c}function t(c,b,g){b in c?Object.defineProperty(c,b,{value:g,enumerable:!0,configurable:!0,writable:!0}):c[b]=g;return c}var f=h("./StringUtils");h=function(){function c(b){if(!(this instanceof c))throw new TypeError("Cannot call a class as a function");t(this,"_isInitialized",void 0);t(this,"_size",void 0);this._isInitialized=!1;this._size=0}q(c,[{key:"init",value:function(b){var c=this;if(this._isInitialized)setTimeout(b.onSuccess,1);else return this._init({onSuccess:function(){c._isInitialized=
+!0;b.onSuccess()},onError:b.onError})}},{key:"_init",value:function(b){throw Error("Must implement init function");}},{key:"loadRange",value:function(b,c){throw Error("Must implement loadRange function");}},{key:"getSize",value:function(){if(!this._isInitialized)throw Error("init() must be called first.");return this._size}},{key:"getByteAt",value:function(b){throw Error("Must implement getByteAt function");}},{key:"getBytesAt",value:function(b,c){for(var g=Array(c),f=0;f<c;f++)g[f]=this.getByteAt(b+
+f);return g}},{key:"isBitSetAt",value:function(b,c){return 0!=(this.getByteAt(b)&1<<c)}},{key:"getSByteAt",value:function(b){b=this.getByteAt(b);return 127<b?b-256:b}},{key:"getShortAt",value:function(b,c){b=c?(this.getByteAt(b)<<8)+this.getByteAt(b+1):(this.getByteAt(b+1)<<8)+this.getByteAt(b);0>b&&(b+=65536);return b}},{key:"getSShortAt",value:function(b,c){b=this.getShortAt(b,c);return 32767<b?b-65536:b}},{key:"getLongAt",value:function(b,c){var g=this.getByteAt(b),f=this.getByteAt(b+1),a=this.getByteAt(b+
+2);b=this.getByteAt(b+3);c=c?(((g<<8)+f<<8)+a<<8)+b:(((b<<8)+a<<8)+f<<8)+g;0>c&&(c+=4294967296);return c}},{key:"getSLongAt",value:function(b,c){b=this.getLongAt(b,c);return 2147483647<b?b-4294967296:b}},{key:"getInteger24At",value:function(b,c){var g=this.getByteAt(b),f=this.getByteAt(b+1);b=this.getByteAt(b+2);c=c?((g<<8)+f<<8)+b:((b<<8)+f<<8)+g;0>c&&(c+=16777216);return c}},{key:"getStringAt",value:function(b,c){for(var g=[],f=b,a=0;f<b+c;f++,a++)g[a]=String.fromCharCode(this.getByteAt(f));return g.join("")}},
+{key:"getStringWithCharsetAt",value:function(b,c,k){b=this.getBytesAt(b,c);switch((k||"").toLowerCase()){case "utf-16":case "utf-16le":case "utf-16be":k=f.readUTF16String(b,"utf-16be"===k);break;case "utf-8":k=f.readUTF8String(b);break;default:k=f.readNullTerminatedString(b)}return k}},{key:"getCharAt",value:function(b){return String.fromCharCode(this.getByteAt(b))}},{key:"getSynchsafeInteger32At",value:function(b){var c=this.getByteAt(b),f=this.getByteAt(b+1),h=this.getByteAt(b+2);return this.getByteAt(b+
+3)&127|(h&127)<<7|(f&127)<<14|(c&127)<<21}}],[{key:"canReadFile",value:function(b){throw Error("Must implement canReadFile function");}}]);return c}();p.exports=h},{"./StringUtils":13}],12:[function(h,p,n){function m(f,c){for(var b=0;b<c.length;b++){var g=c[b];g.enumerable=g.enumerable||!1;g.configurable=!0;"value"in g&&(g.writable=!0);Object.defineProperty(f,g.key,g)}}function q(f,c,b){c&&m(f.prototype,c);b&&m(f,b);return f}function t(f,c,b){c in f?Object.defineProperty(f,c,{value:b,enumerable:!0,
+configurable:!0,writable:!0}):f[c]=b;return f}h("./MediaFileReader");h=function(){function f(c){if(!(this instanceof f))throw new TypeError("Cannot call a class as a function");t(this,"_mediaFileReader",void 0);t(this,"_tags",void 0);this._mediaFileReader=c;this._tags=null}q(f,[{key:"setTagsToRead",value:function(c){this._tags=c;return this}},{key:"read",value:function(c){var b=this;this._mediaFileReader.init({onSuccess:function(){b._loadData(b._mediaFileReader,{onSuccess:function(){try{var g=b._parseData(b._mediaFileReader,
+b._tags)}catch(k){if(c.onError){c.onError({type:"parseData",info:k.message});return}}c.onSuccess(g)},onError:c.onError})},onError:c.onError})}},{key:"getShortcuts",value:function(){return{}}},{key:"_loadData",value:function(c,b){throw Error("Must implement _loadData function");}},{key:"_parseData",value:function(c,b){throw Error("Must implement _parseData function");}},{key:"_expandShortcutTags",value:function(c){if(!c)return null;for(var b=[],g=this.getShortcuts(),f=0,h;h=c[f];f++)b=b.concat(g[h]||
+[h]);return b}}],[{key:"getTagIdentifierByteRange",value:function(){throw Error("Must implement");}},{key:"canReadTagFormat",value:function(c){throw Error("Must implement");}}]);return f}();p.exports=h},{"./MediaFileReader":11}],13:[function(h,p,n){function m(c,b){for(var g=0;g<b.length;g++){var f=b[g];f.enumerable=f.enumerable||!1;f.configurable=!0;"value"in f&&(f.writable=!0);Object.defineProperty(c,f.key,f)}}function q(c,b,f){b&&m(c.prototype,b);f&&m(c,f);return c}function t(c,b,f){b in c?Object.defineProperty(c,
+b,{value:f,enumerable:!0,configurable:!0,writable:!0}):c[b]=f;return c}var f=function(){function c(b,f){if(!(this instanceof c))throw new TypeError("Cannot call a class as a function");t(this,"_value",void 0);t(this,"bytesReadCount",void 0);t(this,"length",void 0);this._value=b;this.bytesReadCount=f;this.length=b.length}q(c,[{key:"toString",value:function(){return this._value}}]);return c}();p.exports={readUTF16String:function(c,b,g){var k=0,h=1,a=0;g=Math.min(g||c.length,c.length);254==c[0]&&255==
+c[1]?(b=!0,k=2):255==c[0]&&254==c[1]&&(b=!1,k=2);b&&(h=0,a=1);b=[];for(var e=0;k<g;e++){var d=c[k+h],l=(d<<8)+c[k+a];k+=2;if(0==l)break;else 216>d||224<=d?b[e]=String.fromCharCode(l):(d=(c[k+h]<<8)+c[k+a],k+=2,b[e]=String.fromCharCode(l,d))}return new f(b.join(""),k)},readUTF8String:function(c,b){var g=0;b=Math.min(b||c.length,c.length);239==c[0]&&187==c[1]&&191==c[2]&&(g=3);for(var h=[],m=0;g<b;m++){var a=c[g++];if(0==a)break;else if(128>a)h[m]=String.fromCharCode(a);else if(194<=a&&224>a){var e=
+c[g++];h[m]=String.fromCharCode(((a&31)<<6)+(e&63))}else if(224<=a&&240>a){e=c[g++];var d=c[g++];h[m]=String.fromCharCode(((a&255)<<12)+((e&63)<<6)+(d&63))}else if(240<=a&&245>a){e=c[g++];d=c[g++];var l=c[g++];d=((a&7)<<18)+((e&63)<<12)+((d&63)<<6)+(l&63)-65536;h[m]=String.fromCharCode((d>>10)+55296,(d&1023)+56320)}}return new f(h.join(""),g)},readNullTerminatedString:function(c,b){var g=[];b=b||c.length;for(var h=0;h<b;){var m=c[h++];if(0==m)break;g[h-1]=String.fromCharCode(m)}return new f(g.join(""),
+h)}}},{}],14:[function(h,p,n){function m(a){m="function"===typeof Symbol&&"symbol"===typeof Symbol.iterator?function(a){return typeof a}:function(a){return a&&"function"===typeof Symbol&&a.constructor===Symbol&&a!==Symbol.prototype?"symbol":typeof a};return m(a)}function q(a,b){for(var d=0;d<b.length;d++){var c=b[d];c.enumerable=c.enumerable||!1;c.configurable=!0;"value"in c&&(c.writable=!0);Object.defineProperty(a,c.key,c)}}function t(a,b,d){b&&q(a.prototype,b);d&&q(a,d);return a}function f(a){f=
+Object.setPrototypeOf?Object.getPrototypeOf:function(a){return a.__proto__||Object.getPrototypeOf(a)};return f(a)}function c(a){if(void 0===a)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return a}function b(a,b){if("function"!==typeof b&&null!==b)throw new TypeError("Super expression must either be null or a function");a.prototype=Object.create(b&&b.prototype,{constructor:{value:a,writable:!0,configurable:!0}});b&&g(a,b)}function g(a,b){g=Object.setPrototypeOf||
+function(a,b){a.__proto__=b;return a};return g(a,b)}function k(a,b,d){b in a?Object.defineProperty(a,b,{value:d,enumerable:!0,configurable:!0,writable:!0}):a[b]=d;return a}var r=h("./ChunkedFileData");n=function(a){function e(a){if(!(this instanceof e))throw new TypeError("Cannot call a class as a function");var b=f(e).call(this);b=!b||"object"!==m(b)&&"function"!==typeof b?c(this):b;k(c(b),"_url",void 0);k(c(b),"_fileData",void 0);b._url=a;b._fileData=new r;return b}b(e,a);t(e,[{key:"_init",value:function(a){e._config.avoidHeadRequests?
+this._fetchSizeWithGetRequest(a):this._fetchSizeWithHeadRequest(a)}},{key:"_fetchSizeWithHeadRequest",value:function(a){var b=this;this._makeXHRRequest("HEAD",null,{onSuccess:function(d){(d=b._parseContentLength(d))?(b._size=d,a.onSuccess()):b._fetchSizeWithGetRequest(a)},onError:a.onError})}},{key:"_fetchSizeWithGetRequest",value:function(a){var b=this,d=this._roundRangeToChunkMultiple([0,0]);this._makeXHRRequest("GET",d,{onSuccess:function(d){var c=b._parseContentRange(d);d=b._getXhrResponseContent(d);
+if(c){if(null==c.instanceLength){b._fetchEntireFile(a);return}b._size=c.instanceLength}else b._size=d.length;b._fileData.addData(0,d);a.onSuccess()},onError:a.onError})}},{key:"_fetchEntireFile",value:function(a){var b=this;this._makeXHRRequest("GET",null,{onSuccess:function(d){d=b._getXhrResponseContent(d);b._size=d.length;b._fileData.addData(0,d);a.onSuccess()},onError:a.onError})}},{key:"_getXhrResponseContent",value:function(a){return a.responseBody||a.responseText||""}},{key:"_parseContentLength",
+value:function(a){a=this._getResponseHeader(a,"Content-Length");return null==a?a:parseInt(a,10)}},{key:"_parseContentRange",value:function(a){if(a=this._getResponseHeader(a,"Content-Range")){var b=a.match(/bytes (\d+)-(\d+)\/(?:(\d+)|\*)/i);if(!b)throw Error("FIXME: Unknown Content-Range syntax: "+a);return{firstBytePosition:parseInt(b[1],10),lastBytePosition:parseInt(b[2],10),instanceLength:b[3]?parseInt(b[3],10):null}}return null}},{key:"loadRange",value:function(a,b){var d=this;d._fileData.hasDataRange(a[0],
+Math.min(d._size,a[1]))?setTimeout(b.onSuccess,1):(a=this._roundRangeToChunkMultiple(a),a[1]=Math.min(d._size,a[1]),this._makeXHRRequest("GET",a,{onSuccess:function(c){c=d._getXhrResponseContent(c);d._fileData.addData(a[0],c);b.onSuccess()},onError:b.onError}))}},{key:"_roundRangeToChunkMultiple",value:function(a){return[a[0],a[0]+1024*Math.ceil((a[1]-a[0]+1)/1024)-1]}},{key:"_makeXHRRequest",value:function(a,b,c){var d=this._createXHRObject();d.open(a,this._url);var f=function(){if(200===d.status||
+206===d.status)c.onSuccess(d);else if(c.onError)c.onError({type:"xhr",info:"Unexpected HTTP status "+d.status+".",xhr:d});d=null};"undefined"!==typeof d.onload?(d.onload=f,d.onerror=function(){if(c.onError)c.onError({type:"xhr",info:"Generic XHR error, check xhr object.",xhr:d})}):d.onreadystatechange=function(){4===d.readyState&&f()};e._config.timeoutInSec&&(d.timeout=1E3*e._config.timeoutInSec,d.ontimeout=function(){if(c.onError)c.onError({type:"xhr",info:"Timeout after "+d.timeout/1E3+"s. Use jsmediatags.Config.setXhrTimeout to override.",
+xhr:d})});d.overrideMimeType("text/plain; charset=x-user-defined");b&&this._setRequestHeader(d,"Range","bytes="+b[0]+"-"+b[1]);this._setRequestHeader(d,"If-Modified-Since","Sat, 01 Jan 1970 00:00:00 GMT");d.send(null)}},{key:"_setRequestHeader",value:function(a,b,c){0>e._config.disallowedXhrHeaders.indexOf(b.toLowerCase())&&a.setRequestHeader(b,c)}},{key:"_hasResponseHeader",value:function(a,b){a=a.getAllResponseHeaders();if(!a)return!1;a=a.split("\r\n");for(var d=[],c=0;c<a.length;c++)d[c]=a[c].split(":")[0].toLowerCase();
+return 0<=d.indexOf(b.toLowerCase())}},{key:"_getResponseHeader",value:function(a,b){return this._hasResponseHeader(a,b)?a.getResponseHeader(b):null}},{key:"getByteAt",value:function(a){return this._fileData.getByteAt(a).charCodeAt(0)&255}},{key:"_isWebWorker",value:function(){return"undefined"!==typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope}},{key:"_createXHRObject",value:function(){if("undefined"===typeof window&&!this._isWebWorker())return new (h("xhr2").XMLHttpRequest);if("undefined"!==
+typeof XMLHttpRequest)return new XMLHttpRequest;throw Error("XMLHttpRequest is not supported");}}],[{key:"canReadFile",value:function(a){return"string"===typeof a&&/^[a-z]+:\/\//i.test(a)}},{key:"setConfig",value:function(a){for(var b in a)a.hasOwnProperty(b)&&(this._config[b]=a[b]);a=this._config.disallowedXhrHeaders;for(b=0;b<a.length;b++)a[b]=a[b].toLowerCase()}}]);return e}(h("./MediaFileReader"));k(n,"_config",void 0);n._config={avoidHeadRequests:!1,disallowedXhrHeaders:[],timeoutInSec:30};p.exports=
+n},{"./ChunkedFileData":5,"./MediaFileReader":11,xhr2:2}],15:[function(h,p,n){function m(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function");}function q(a,b){for(var c=0;c<b.length;c++){var d=b[c];d.enumerable=d.enumerable||!1;d.configurable=!0;"value"in d&&(d.writable=!0);Object.defineProperty(a,d.key,d)}}function t(a,b,c){b&&q(a.prototype,b);c&&q(a,c);return a}function f(a,b,c){b in a?Object.defineProperty(a,b,{value:c,enumerable:!0,configurable:!0,writable:!0}):a[b]=
+c;return a}function c(a,b){var c=0>a.offset&&(-a.offset>b||0<a.offset+a.length);return!(0<=a.offset&&a.offset+a.length>=b||c)}h("./MediaFileReader");var b=h("./XhrFileReader"),g=h("./BlobFileReader"),k=h("./ArrayFileReader");h("./MediaTagReader");var r=h("./ID3v1TagReader"),a=h("./ID3v2TagReader"),e=h("./MP4TagReader"),d=h("./FLACTagReader"),l=[],u=[],w=function(){function a(b){m(this,a);f(this,"_file",void 0);f(this,"_tagsToRead",void 0);f(this,"_fileReader",void 0);f(this,"_tagReader",void 0);this._file=
+b}t(a,[{key:"setTagsToRead",value:function(a){this._tagsToRead=a;return this}},{key:"setFileReader",value:function(a){this._fileReader=a;return this}},{key:"setTagReader",value:function(a){this._tagReader=a;return this}},{key:"read",value:function(a){var b=new (this._getFileReader())(this._file),c=this;b.init({onSuccess:function(){c._getTagReader(b,{onSuccess:function(d){(new d(b)).setTagsToRead(c._tagsToRead).read(a)},onError:a.onError})},onError:a.onError})}},{key:"_getFileReader",value:function(){return this._fileReader?
+this._fileReader:this._findFileReader()}},{key:"_findFileReader",value:function(){for(var a=0;a<l.length;a++)if(l[a].canReadFile(this._file))return l[a];throw Error("No suitable file reader found for "+this._file);}},{key:"_getTagReader",value:function(a,b){if(this._tagReader){var c=this._tagReader;setTimeout(function(){b.onSuccess(c)},1)}else this._findTagReader(a,b)}},{key:"_findTagReader",value:function(a,b){for(var d=[],e=[],f=a.getSize(),g=0;g<u.length;g++){var h=u[g].getTagIdentifierByteRange();
+c(h,f)&&(0<=h.offset&&h.offset<f/2||0>h.offset&&h.offset<-f/2?d.push(u[g]):e.push(u[g]))}var k=!1;g={onSuccess:function(){if(k){for(var d=0;d<u.length;d++){var e=u[d].getTagIdentifierByteRange();if(c(e,f)){try{var g=a.getBytesAt(0<=e.offset?e.offset:e.offset+f,e.length)}catch(x){if(b.onError)b.onError({type:"fileReader",info:x.message});return}if(u[d].canReadTagFormat(g)){b.onSuccess(u[d]);return}}}if(b.onError)b.onError({type:"tagFormat",info:"No suitable tag reader found"})}else k=!0},onError:b.onError};
+this._loadTagIdentifierRanges(a,d,g);this._loadTagIdentifierRanges(a,e,g)}},{key:"_loadTagIdentifierRanges",value:function(a,b,c){if(0===b.length)setTimeout(c.onSuccess,1);else{for(var d=[Number.MAX_VALUE,0],e=a.getSize(),f=0;f<b.length;f++){var g=b[f].getTagIdentifierByteRange(),h=0<=g.offset?g.offset:g.offset+e;g=h+g.length-1;d[0]=Math.min(h,d[0]);d[1]=Math.max(g,d[1])}a.loadRange(d,c)}}}]);return a}();n=function(){function a(){m(this,a)}t(a,null,[{key:"addFileReader",value:function(b){l.push(b);
+return a}},{key:"addTagReader",value:function(b){u.push(b);return a}},{key:"removeTagReader",value:function(b){b=u.indexOf(b);0<=b&&u.splice(b,1);return a}},{key:"EXPERIMENTAL_avoidHeadRequests",value:function(){b.setConfig({avoidHeadRequests:!0})}},{key:"setDisallowedXhrHeaders",value:function(a){b.setConfig({disallowedXhrHeaders:a})}},{key:"setXhrTimeoutInSec",value:function(a){b.setConfig({timeoutInSec:a})}}]);return a}();n.addFileReader(b).addFileReader(g).addFileReader(k).addTagReader(a).addTagReader(r).addTagReader(e).addTagReader(d);
+"undefined"===typeof process||process.browser||(h="undefined"!==typeof navigator&&"ReactNative"===navigator.product?h("./ReactNativeFileReader"):h("./NodeFileReader"),n.addFileReader(h));p.exports={read:function(a,b){(new w(a)).read(b)},Reader:w,Config:n}},{"./ArrayFileReader":3,"./BlobFileReader":4,"./FLACTagReader":6,"./ID3v1TagReader":7,"./ID3v2TagReader":9,"./MP4TagReader":10,"./MediaFileReader":11,"./MediaTagReader":12,"./NodeFileReader":1,"./ReactNativeFileReader":1,"./XhrFileReader":14}]},
+{},[15])(15)});
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- DOM ----------
+  const $ = (id) => document.getElementById(id);
+  const dropzone = $('dropzone');
+  const fileInput = $('fileInput');
+  const editor = $('editor');
+  const coverInput = $('coverInput');
+  const coverCard = $('coverCard');
+  const coverBox = $('coverBox');
+  const coverPreview = $('coverPreview');
+  const coverEmpty = $('coverEmpty');
+  const coverUrlInput = $('coverUrl');
+  const audioUrlInput = $('audioUrl');
+  const autoRename = $('autoRename');
+  const player = $('player');
+  const statusEl = $('status');
+
+  const fields = {
+    title: $('fTitle'),
+    artist: $('fArtist'),
+    albumArtist: $('fAlbumArtist'),
+    album: $('fAlbum'),
+    year: $('fYear'),
+    genre: $('fGenre'),
+    trackNo: $('fTrackNo'),
+    trackCount: $('fTrackCount'),
+    discNo: $('fDiscNo'),
+    discCount: $('fDiscCount'),
+    lyrics: $('fLyrics')
+  };
+
+  // ---------- 状态 ----------
+  const state = {
+    file: null,
+    coverBuffer: null,   // ArrayBuffer，用于写入 APIC 帧
+    previewUrl: null     // 原文件试听 ObjectURL
+  };
+
+  // ---------- 工具 ----------
+  function setStatus(msg, type) {
+    statusEl.textContent = msg || '';
+    statusEl.className = type || '';
+  }
+
+  function formatSize(bytes) {
+    if (!bytes && bytes !== 0) return '—';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  function bytesToDataUri(format, bytes) {
+    const arr = Array.from(bytes);
+    const chunk = 0x8000;
+    let bin = '';
+    for (let i = 0; i < arr.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, arr.slice(i, i + chunk));
+    }
+    return 'data:' + (format || 'image/jpeg') + ';base64,' + btoa(bin);
+  }
+
+  function extractLyrics(raw) {
+    if (!raw) return '';
+    if (typeof raw === 'string') return raw;
+    return raw.lyrics || raw.text || raw.descriptor || '';
+  }
+
+  // 音轨 / 碟片号可能是字符串 "3/12"，也可能是 { no, of } 对象
+  function splitPair(v) {
+    if (v == null) return ['', ''];
+    if (typeof v === 'string') {
+      const parts = v.split('/');
+      return [parts[0] || '', parts[1] || ''];
+    }
+    return [v.no != null ? v.no : '', v.of != null ? v.of : ''];
+  }
+
+  // 文件名清洗：非法字符尽量替换为全角等价字符，而不是一律抹成空格
+  function sanitizeName(name) {
+    let s = (name || '')
+      // 控制字符（ASCII 0–31 及 DEL）直接删除
+      .replace(/[\x00-\x1f\x7f]/g, '')
+      // 路径分隔符多为多人名连接符，两侧空格一并去掉，改用中文顿号
+      .replace(/\s*[\\/]\s*/g, '、')
+      // 半角标点 → 全角等价字符（均为各系统合法文件名字符）
+      .replace(/\s*:\s*/g, '：')
+      .replace(/\?/g, '？')
+      .replace(/\*/g, '＊')
+      .replace(/"/g, '＂')
+      .replace(/</g, '＜')
+      .replace(/>/g, '＞')
+      .replace(/\|/g, '｜');
+    // 压缩连续空白，去除首尾空格；去掉结尾的空格与点号（Windows 会自动截掉）
+    s = s.replace(/\s+/g, ' ').trim().replace(/[.\s]+$/g, '');
+    // Windows 保留设备名（CON / PRN / AUX / NUL / COM1~9 / LPT1~9）加前缀避免冲突
+    if (/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\..*)?$/i.test(s)) s = '_' + s;
+    // 超长截断，预留 .mp3 后缀空间
+    if (s.length > 200) s = s.slice(0, 200).trim().replace(/[.\s]+$/g, '');
+    return s || 'untitled';
+  }
+
+  // ---------- 读取标签 ----------
+  function loadFile(file) {
+    if (!file) return;
+    if (typeof jsmediatags === 'undefined') {
+      setStatus('标签读取库未加载成功，请检查网络后刷新页面。', 'err');
+      return;
+    }
+    state.file = file;
+    setStatus('正在读取标签…');
+
+    $('fileName').textContent = file.name;
+    $('fileSize').textContent = formatSize(file.size);
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const warn = $('formatWarn');
+    if (ext !== 'mp3') {
+      warn.hidden = false;
+      warn.textContent = '注意：当前为 .' + ext + ' 格式，写回标签仅保证 MP3 可用。';
+    } else {
+      warn.hidden = true;
+    }
+
+    // 试听地址
+    if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+    state.previewUrl = URL.createObjectURL(file);
+    player.src = state.previewUrl;
+    player.hidden = false;
+
+    jsmediatags.read(file, {
+      onSuccess: function (tag) {
+        const t = (tag && tag.tags) || {};
+        fields.title.value = t.title || '';
+        fields.artist.value = t.artist || '';
+        fields.album.value = t.album || '';
+        fields.albumArtist.value = t.albumartist || t.band || (t.TPE2 && t.TPE2.data) || '';
+        fields.year.value = t.year || (t.TDRC && t.TDRC.data) || (t.TYER && t.TYER.data) || '';
+        fields.genre.value = (typeof t.genre === 'object' && t.genre) ? (t.genre.name || '') : (t.genre || '');
+        const tr = splitPair(t.track);
+        const ds = splitPair(t.disk);
+        fields.trackNo.value = tr[0];
+        fields.trackCount.value = tr[1];
+        fields.discNo.value = ds[0];
+        fields.discCount.value = ds[1];
+        fields.lyrics.value = extractLyrics(t.lyrics);
+
+        // 封面
+        state.coverBuffer = null;
+        if (t.picture && t.picture.data && t.picture.data.length) {
+          try {
+            const dataUri = bytesToDataUri(t.picture.format, t.picture.data);
+            coverPreview.src = dataUri;
+            coverPreview.hidden = false;
+            coverEmpty.hidden = true;
+            // 保留原始封面字节用于写回
+            state.coverBuffer = Uint8Array.from(t.picture.data).buffer;
+          } catch (e) {
+            showNoCover();
+          }
+        } else {
+          showNoCover();
+        }
+
+        editor.style.display = 'block';
+        setStatus('读取完成，可在下方编辑标签后导出。', 'ok');
+      },
+      onError: function (err) {
+        // 读取失败也进入编辑界面，允许手动填写
+        fields.title.value = file.name.replace(/\.[^.]+$/, '');
+        showNoCover();
+        editor.style.display = 'block';
+        setStatus('未读取到已有标签（' + (err && err.type ? err.type : '未知错误') + '），可手动填写后导出。', 'err');
+      }
+    });
+  }
+
+  function showNoCover() {
+    coverPreview.hidden = true;
+    coverPreview.removeAttribute('src');
+    coverEmpty.hidden = false;
+  }
+
+  // ---------- 封面：本地文件 / 拖放 / URL ----------
+  function isImageFile(file) {
+    return /^image\//.test(file.type || '') || /\.(jpe?g|png|gif|webp|bmp|ico)$/i.test(file.name || '');
+  }
+
+  function applyCover(buf, previewSrc) {
+    state.coverBuffer = buf;
+    if (previewSrc) coverPreview.src = previewSrc;
+    coverPreview.hidden = false;
+    coverEmpty.hidden = true;
+  }
+
+  function loadCoverFile(file) {
+    if (!file) return;
+    if (!isImageFile(file)) {
+      setStatus('拖入的文件不是图片，请选择图片文件。', 'err');
+      return;
+    }
+    file.arrayBuffer().then(function (buf) {
+      applyCover(buf, URL.createObjectURL(file));
+      setStatus('已选择新封面，导出时将写入歌曲标签。', 'ok');
+    }).catch(function () {
+      setStatus('封面图片读取失败。', 'err');
+    });
+  }
+
+  function loadCoverFromUrl() {
+    const url = coverUrlInput.value.trim();
+    if (!url) { setStatus('请先粘贴封面图片链接。', 'err'); return; }
+    setStatus('正在从链接拉取封面…');
+    fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.blob();
+    }).then(function (blob) {
+      if (!/^image\//.test(blob.type || '') && !/^data:image\//.test(url)) {
+        throw new Error('返回内容不是图片（' + (blob.type || '未知类型') + '）');
+      }
+      return blob.arrayBuffer().then(function (buf) { return { buf: buf, blob: blob }; });
+    }).then(function (res) {
+      applyCover(res.buf, URL.createObjectURL(res.blob));
+      setStatus('已从链接加载封面，导出时将写入歌曲标签。', 'ok');
+    }).catch(function (err) {
+      setStatus('封面加载失败：' + (err && err.message ? err.message : '网络或跨域限制') + '。可将图片另存后拖入封面区。', 'err');
+    });
+  }
+
+  coverInput.addEventListener('change', function () {
+    loadCoverFile(coverInput.files && coverInput.files[0]);
+  });
+
+  $('replaceCover').addEventListener('click', function (e) { e.stopPropagation(); coverInput.click(); });
+  coverBox.addEventListener('click', function () { coverInput.click(); });
+
+  $('loadCoverUrl').addEventListener('click', loadCoverFromUrl);
+  coverUrlInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') loadCoverFromUrl();
+  });
+
+  // 封面拖放
+  ['dragover', 'dragenter'].forEach(function (ev) {
+    coverCard.addEventListener(ev, function (e) {
+      e.preventDefault();
+      coverCard.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    coverCard.addEventListener(ev, function (e) {
+      e.preventDefault();
+      coverCard.classList.remove('dragover');
+    });
+  });
+  coverCard.addEventListener('drop', function (e) {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    loadCoverFile(f);
+  });
+
+  $('removeCover').addEventListener('click', function () {
+    state.coverBuffer = null;
+    coverInput.value = '';
+    coverUrlInput.value = '';
+    showNoCover();
+    setStatus('已标记移除封面，导出后的文件将不含封面图。');
+  });
+
+  // ---------- 选文件 / 拖放 ----------
+  dropzone.addEventListener('click', function () { fileInput.click(); });
+  $('audioUrlRow').addEventListener('click', function (e) { e.stopPropagation(); });
+  fileInput.addEventListener('change', function () {
+    loadFile(fileInput.files && fileInput.files[0]);
+  });
+
+  // ---------- 音频直链解析 ----------
+  function loadAudioFromUrl() {
+    const url = audioUrlInput.value.trim();
+    if (!url) { setStatus('请先粘贴音频文件直链。', 'err'); return; }
+    setStatus('正在从链接下载音频…');
+    fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.blob();
+    }).then(function (blob) {
+      let name = decodeURIComponent((url.split('?')[0].split('/').pop()) || '');
+      if (!name || !/\.[a-z0-9]+$/i.test(name)) name = 'remote.mp3';
+      const file = new File([blob], name, { type: blob.type });
+      loadFile(file);
+    }).catch(function (err) {
+      setStatus('音频加载失败：' + (err && err.message ? err.message : '网络或跨域限制') + '。多数网站禁止跨域抓取，建议先下载到本地再拖入。', 'err');
+    });
+  }
+
+  $('loadAudioUrl').addEventListener('click', loadAudioFromUrl);
+  audioUrlInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') loadAudioFromUrl();
+  });
+
+  ['dragover', 'dragenter'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    dropzone.addEventListener(ev, function (e) {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    });
+  });
+  dropzone.addEventListener('drop', function (e) {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    loadFile(f);
+  });
+
+  // ---------- 导出 ----------
+  $('exportBtn').addEventListener('click', function () {
+    if (!state.file) return;
+    if (typeof ID3Writer === 'undefined') {
+      setStatus('标签写入库未加载成功，请检查网络后刷新页面。', 'err');
+      return;
+    }
+
+    const ext = (state.file.name.split('.').pop() || '').toLowerCase();
+    if (ext !== 'mp3') {
+      if (!confirm('当前文件不是 MP3，ID3 标签写入仅对 MP3 可靠。仍要继续导出吗？')) return;
+    }
+
+    setStatus('正在写入标签…');
+    state.file.arrayBuffer().then(function (buf) {
+      const writer = new ID3Writer(buf);
+
+      const title = fields.title.value.trim();
+      const artist = fields.artist.value.trim();
+      const album = fields.album.value.trim();
+      const albumArtist = fields.albumArtist.value.trim();
+      const year = fields.year.value.trim();
+      const genre = fields.genre.value.trim();
+      const trck = [fields.trackNo.value.trim(), fields.trackCount.value.trim()].filter(Boolean).join('/');
+      const tpos = [fields.discNo.value.trim(), fields.discCount.value.trim()].filter(Boolean).join('/');
+      const lyrics = fields.lyrics.value;
+
+      if (title) writer.setFrame('TIT2', title);
+      if (artist) writer.setFrame('TPE1', [artist]);
+      if (album) writer.setFrame('TALB', album);
+      if (albumArtist) writer.setFrame('TPE2', albumArtist);
+      if (year) { const y = parseInt(year, 10); if (!isNaN(y) && y) writer.setFrame('TYER', y); }
+      if (genre) writer.setFrame('TCON', [genre]);
+      if (trck) writer.setFrame('TRCK', trck);
+      if (tpos) writer.setFrame('TPOS', tpos);
+      if (lyrics.trim()) writer.setFrame('USLT', { description: '', lyrics: lyrics });
+      if (state.coverBuffer) {
+        writer.setFrame('APIC', { type: 3, data: state.coverBuffer, description: '' });
+      }
+
+      writer.addTag();
+      const blob = writer.getBlob();
+
+      let base;
+      if (autoRename.checked) {
+        const parts = [title, artist].filter(Boolean);
+        base = sanitizeName(parts.join(' - ') || state.file.name.replace(/\.[^.]+$/, ''));
+      } else {
+        base = sanitizeName(title || state.file.name.replace(/\.[^.]+$/, ''));
+      }
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = base + '.mp3';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+
+      setStatus('导出完成：' + a.download + '（' + formatSize(blob.size) + '）', 'ok');
+    }).catch(function (err) {
+      console.error(err);
+      setStatus('写入失败：' + (err && err.message ? err.message : '未知错误'), 'err');
+    });
+  });
+
+  $('resetBtn').addEventListener('click', function () {
+    editor.style.display = 'none';
+    dropzone.scrollIntoView({ behavior: 'smooth' });
+    fileInput.value = '';
+  });
+})();
+</script>
+</body>
+</html>
